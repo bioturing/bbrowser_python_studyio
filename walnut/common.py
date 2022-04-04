@@ -58,4 +58,4 @@ def get_timestamp():
     return time.time() * 1000
 
 def create_uuid():
-    return str(uuid4()).replace('-', '')
+    return str(uuid4()).replace("-", "")

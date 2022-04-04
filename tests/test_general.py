@@ -3,10 +3,10 @@ import tempfile
 import json
 
 def test_fuzzy_dict():
-    x = FuzzyDict({'a': 1, 'b': 2})
-    val = x.get('A', 'a')
+    x = FuzzyDict({"a": 1, "b": 2})
+    val = x.get("A", "a")
     assert val == 1
-    val = x.get('B')
+    val = x.get("B")
     assert val is None
 
 def test_gallery():
@@ -14,7 +14,7 @@ def test_gallery():
     study_folder = tempfile.mkdtemp()
     study = Study(study_folder)
 
-    # Test initializing from dict
+    # Test initializing from json
     imm_id = study.gallery.create_gene_collection("immune", ["CD3D", "NKG7", "CD79A"])
     tcell_id = study.gallery.create_gene_collection("T cells", ["CD3D", "CD8A"])
     json_str = study.gallery.to_json()
