@@ -2,7 +2,6 @@ from pydantic import BaseModel
 from typing import Tuple, List
 from walnut import constants
 from walnut.common import FileIO
-from enum import Enum
 
 class UnitSettings(BaseModel):
     type: constants.UNIT_TYPE_LIST
