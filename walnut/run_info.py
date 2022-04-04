@@ -35,11 +35,11 @@ class RunInfoStr(BaseModel):
     misc: dict[str, str]
     papers: List[str]
     abstract: str
-    author: list[str]
+    author: List[str]
     unit: constants.UNIT_LIST
-    shareTag: list[str]
-    tag: list[str]
-    history: list[Commit]
+    shareTag: List[str]
+    tag: List[str]
+    history: List[Commit]
     is_public: bool
     ana_setting: AnaSetting
     version: int
