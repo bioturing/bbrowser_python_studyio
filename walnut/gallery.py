@@ -7,6 +7,7 @@ class Item(TypedDict):
     name: str
     id: str
     created_at: constants.NUM
+    last_modified: constants.NUM
     features: list[str]
 
 class Collection(TypedDict):
@@ -64,13 +65,13 @@ class Gallery:
                 result.append(item["features"])
         return result
     
-    def __get_collection_index(self, col_id):
+    def __get_collection_index(self, col_id) -> int:
         for i, col in enumerate(self.collections):
             if col["id"] == col_id:
                 return i
         raise Exception("%s does not exist" % col_id)
 
-    def add_item(self, col_id: str, name: str, gene_id: list[str]):
+    def add_item(self, col_id: str, name: str, gene_id: list[str]) -> str:
         now = common.get_timestamp()
         item = Item(name=name, id=common.create_uuid(), features=gene_id,
                            created_at=now, last_modified=now)
