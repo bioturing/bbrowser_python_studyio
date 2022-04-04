@@ -1,13 +1,15 @@
 import json
 import os
+import time
+from uuid import uuid4
 from abc import ABC, abstractmethod
 
 class FileIO(ABC):
     def __init__(self, filepath):
         self.path = filepath
     
-    def exists(self):
-        os.path.isfile(self.path)
+    def exists(self) -> bool:
+        return os.path.isfile(self.path)
     
     @abstractmethod
     def read(self) -> str:
@@ -51,3 +53,9 @@ class FuzzyDict(dict):
 
     def __len__(self):
         return len(self.keys())
+
+def get_timestamp():
+    return time.time() * 1000
+
+def create_uuid():
+    return str(uuid4()).replace('-', '')
