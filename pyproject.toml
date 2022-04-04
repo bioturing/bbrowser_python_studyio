@@ -2,6 +2,7 @@
 name = "walnut"
 description = "Read or write a BBrowser study"
 version = "0.1.0"
+license = { file = "LICENSE" }
 authors = [
     { name = "Tri Le", email = "tri@bioturing.com" },
     { name = "Vu Nguyen", email = "vu@bioturing.com" }
