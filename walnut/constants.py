@@ -1,4 +1,8 @@
-from typing import Literal, Union
+from typing import Union
+try:
+    from typing import Literal
+except:
+    from typing_extensions import Literal
 
 NUM = Union[int, float]
 

@@ -1,7 +1,8 @@
 from pydantic import BaseModel
-from typing import Tuple, Literal
+from typing import Tuple, List
 from walnut import constants
 from walnut.common import FileIO
+from enum import Enum
 
 class UnitSettings(BaseModel):
     type: constants.UNIT_TYPE_LIST
@@ -20,7 +21,7 @@ class FilterSetting(BaseModel):
     top: int
 
 class AnaSetting(BaseModel):
-    inputType: list[constants.INPUT_FORMAT_LIST]
+    inputType: List[constants.INPUT_FORMAT_LIST]
     normMethod: constants.NORMALIZATION_LIST
     filter: FilterSetting
 
@@ -29,11 +30,11 @@ class RunInfoStr(BaseModel):
     title: str
     species: constants.SPECIES_LIST
     n_cell: int
-    omics: list[constants.OMICS_LIST]
+    omics: List[constants.OMICS_LIST]
     unit_settings: dict[constants.OMICS_LIST, UnitSettings]
     modified_date: constants.NUM
     misc: dict[str, str]
-    papers: list[str]
+    papers: List[str]
     abstract: str
     author: list[str]
     unit: constants.UNIT_LIST
@@ -42,7 +43,7 @@ class RunInfoStr(BaseModel):
     history: list[Commit]
     is_public: bool
     ana_setting: AnaSetting
-    version: Literal[16]
+    version: int
 
 class RunInfo():
     def __init__(self, filepath, TextFile: FileIO):

@@ -1,6 +1,6 @@
 import os
 from walnut import constants, common
-from typing import TypedDict, Union
+from typing import TypedDict, Union, List
 import json
 
 class Item(TypedDict):
@@ -8,12 +8,12 @@ class Item(TypedDict):
     id: str
     created_at: constants.NUM
     last_modified: constants.NUM
-    features: list[str]
+    features: List[str]
 
 class Collection(TypedDict):
     name: str
     type: constants.OMICS_LIST
-    items: list[Item]
+    items: List[Item]
     id: str
     created_at: constants.NUM
     last_modified: constants.NUM
@@ -25,7 +25,7 @@ class Gallery:
         self.__TextFile = TextFile
         self.__old_gallery = common.JSONFile(os.path.join(self.__dir, "gene_gallery.json"), self.__TextFile)
         self.__gallery = common.JSONFile(os.path.join(self.__dir, "gene_gallery_2.json"), self.__TextFile)
-        self.collections: list[Collection] = []
+        self.collections: List[Collection] = []
     
     def from_json(self, json_str: str):
         self.collections = json.loads(json_str)
@@ -52,7 +52,7 @@ class Gallery:
             raise Exception("Cannot write an empty gallery")
         self.__gallery.write(self.collections)
     
-    def get(self, col_id: str, straighten: bool=True, unique: bool=True) -> Union[list[list], list[str]]:
+    def get(self, col_id: str, straighten: bool=True, unique: bool=True) -> Union[List[list], List[str]]:
         """Get a list of item IDs given a collection ID"""
         col = self.collections[self.__get_collection_index(col_id)]
         result = []
@@ -71,7 +71,7 @@ class Gallery:
                 return i
         raise Exception("%s does not exist" % col_id)
 
-    def add_item(self, col_id: str, name: str, gene_id: list[str]) -> str:
+    def add_item(self, col_id: str, name: str, gene_id: List[str]) -> str:
         now = common.get_timestamp()
         item = Item(name=name, id=common.create_uuid(), features=gene_id,
                            created_at=now, last_modified=now)
@@ -86,7 +86,7 @@ class Gallery:
         self.collections.append(col)
         return col["id"]
 
-    def create_gene_collection(self, name: str, gene_id: list[str]) -> str:
+    def create_gene_collection(self, name: str, gene_id: List[str]) -> str:
         """Create a gene collection given a list of genes"""
         col_id = self.create_empty_collection(name)
         for gene in gene_id:
