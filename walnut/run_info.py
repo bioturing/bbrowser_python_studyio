@@ -1,5 +1,5 @@
 from pydantic import BaseModel
-from typing import Tuple, Literal
+from typing import Tuple, List
 from walnut import constants
 from walnut.common import FileIO
 
@@ -20,7 +20,7 @@ class FilterSetting(BaseModel):
     top: int
 
 class AnaSetting(BaseModel):
-    inputType: list[constants.INPUT_FORMAT_LIST]
+    inputType: List[constants.INPUT_FORMAT_LIST]
     normMethod: constants.NORMALIZATION_LIST
     filter: FilterSetting
 
@@ -29,20 +29,20 @@ class RunInfoStr(BaseModel):
     title: str
     species: constants.SPECIES_LIST
     n_cell: int
-    omics: list[constants.OMICS_LIST]
+    omics: List[constants.OMICS_LIST]
     unit_settings: dict[constants.OMICS_LIST, UnitSettings]
     modified_date: constants.NUM
     misc: dict[str, str]
-    papers: list[str]
+    papers: List[str]
     abstract: str
-    author: list[str]
+    author: List[str]
     unit: constants.UNIT_LIST
-    shareTag: list[str]
-    tag: list[str]
-    history: list[Commit]
+    shareTag: List[str]
+    tag: List[str]
+    history: List[Commit]
     is_public: bool
     ana_setting: AnaSetting
-    version: Literal[16]
+    version: int
 
 class RunInfo():
     def __init__(self, filepath, TextFile: FileIO):
