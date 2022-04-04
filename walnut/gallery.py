@@ -1,7 +1,12 @@
 import os
 from walnut import constants, common
-from typing import TypedDict, Union, List
+from typing import Union, List
 import json
+
+try:
+    from typing import TypedDict
+except:
+    from typing_extensions import TypedDict
 
 class Item(TypedDict):
     name: str
