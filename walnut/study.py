@@ -1,5 +1,4 @@
 import os
-import json
 
 from walnut.common import FileIO, TextFile
 from walnut.metadata import Metadata
