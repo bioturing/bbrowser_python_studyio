@@ -3,9 +3,9 @@ from walnut import constants, common
 import os
 
 try:
-    from typing import TypedDict
+    from typing import TypedDict, Type
 except:
-    from typing_extensions import TypedDict
+    from typing_extensions import TypedDict, Type
 
 class UnitSettings(TypedDict):
     type: constants.UNIT_TYPE_LIST
@@ -44,7 +44,7 @@ class RunInfoStruc(TypedDict):
     version: int
 
 class RunInfo():
-    def __init__(self, filepath, TextFile: common.FileIO):
+    def __init__(self, filepath, TextFile: Type[common.FileIO]):
         self.__file = common.JSONFile(filepath, TextFile)
 
         now = common.get_timestamp()

@@ -1,5 +1,10 @@
 import os
 
+try:
+    from typing import Type
+except:
+    from typing_extensions import Type
+
 from walnut.common import FileIO, TextFile
 from walnut.metadata import Metadata
 from walnut.dimred import Dimred
@@ -24,7 +29,7 @@ class StudyStructure:
         self.gene_db = os.path.join(self.main_dir, "gene")
 
 class Study:
-    def __init__(self, study_folder, CustomTextFile: FileIO=TextFile):
+    def __init__(self, study_folder, CustomTextFile: Type[FileIO]=TextFile):
         self.__location = StudyStructure(study_folder)
         self.__TextFile = CustomTextFile
         #self.metadata = Metadata(self.__location.metadata, self.__TextFile)

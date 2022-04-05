@@ -3,19 +3,16 @@ from uuid import uuid4
 from typing import Collection, List, Dict, Any, TypeVar, Generic, Type
 import numpy
 from abc import ABC, abstractmethod
-<<<<<<< HEAD
 import os
 import json
 from walnut.models import History
-=======
 from typing import Type, TypeVar, Generic
 from walnut import constants
 
 try:
-    from typing import TypedDict
+    from typing import TypedDict, Type
 except:
-    from typing_extensions import TypedDict
->>>>>>> basic run info
+    from typing_extensions import TypedDict, Type
 
 FileContent = TypeVar("FileContent")
 
@@ -47,7 +44,7 @@ class TextFile(FileIO[str]):
 class JSONFile(FileIO[dict]):
     def __init__(self, filepath: str, CustomTextFile: Type[TextFile]):
         super().__init__(filepath)
-        self.__file: FileIO = CustomTextFile(filepath)
+        self.__file = CustomTextFile(filepath)
 
     def read(self) -> dict:
         json_str = self.__file.read()
@@ -55,7 +52,7 @@ class JSONFile(FileIO[dict]):
 
     def write(self, obj: dict):
         json_str = json.dumps(obj)
-        self.__file.write(json_str)
+        self.__file.write(json_str)        
 
 class FuzzyDict(dict):
     """A dictionary where value can be obtained with multiple keys"""

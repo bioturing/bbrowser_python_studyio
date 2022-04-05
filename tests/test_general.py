@@ -3,6 +3,7 @@ import tempfile
 import json
 import os
 from walnut.study import Study
+from walnut.gene_db import GeneDB
 
 def test_fuzzy_dict():
     x = FuzzyDict({"a": 1, "b": 2})
@@ -73,3 +74,12 @@ def test_run_info():
     assert study.run_info.get("species") == "human"
     study.run_info.read()
     assert study.run_info.get("species") == "human"
+
+def test_gene_conversion():
+    gene_db = GeneDB("C:/Users/lequa/Documents/bbrowser_python_studyio/walnut/data", "human")
+    gene_db.read()
+    ids = gene_db.convert(["CD3D", "CD79A"])
+    assert ids == ["ENSG00000167286", "ENSG00000105369"]
+    names = gene_db.convert(ids, _from="gene_id", _to="name")
+    assert names == ["CD3D", "CD79A"]
+    assert gene_db.is_id(ids)
