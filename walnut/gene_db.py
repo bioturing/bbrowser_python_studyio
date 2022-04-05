@@ -64,4 +64,20 @@ class GeneDB:
         valid = np.sum(np.isin(pre_in, pre_ref))
         prc_valid = valid * 100 / len(ids)
         return prc_valid > 50
-            
+
+class StudyGeneDB(GeneDB):
+    def __init__(self, gene_db_dir, species):
+        super().__init__(gene_db_dir, species)
+        self.__ref = GeneDB(common.get_pkg_data(), species)
+
+    def create(self, gene_id: List[str], gene_name: List[str]=None):
+        if not gene_name:
+            if self.__ref.is_id(gene_id):
+                gene_name = self.__ref.convert(gene_id, _from="gene_id", _to="name")
+            else:
+                gene_name = gene_id
+                gene_id = self.__ref.convert(gene_id)
+        
+        self.__df = pd.DataFrame({"gene_id": gene_id, "name": gene_name, "primary": 1})
+        self.write()        
+        

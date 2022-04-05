@@ -97,6 +97,7 @@ class Gallery:
     def create_empty_collection(self, name: str, ft_type: constants.OMICS_LIST="RNA") -> str:
         now = common.get_timestamp()
         col = Collection(name=name, type=ft_type, id=common.create_uuid(), items=[],
+<<<<<<< HEAD
                                 created_at=now, last_modified=now, created_by="walnut")
         self.collections.__root__.append(col)
         return col.id
@@ -107,3 +108,8 @@ class Gallery:
         for gene in gene_id:
             self.add_item(col_id, gene, [gene]) # FIXME: Handle gene name and ID
         return col_id
+=======
+                                created_at=now, last_modified=now)
+        self.collections.append(col)
+        return col["id"]
+>>>>>>> basic gene_db

@@ -86,6 +86,7 @@ def get_timestamp():
 def create_uuid():
     return str(uuid4()).replace("-", "")
 
+<<<<<<< HEAD
 def create_history() -> History:
     return History(created_by="walnut", created_at=time.time(),
                     hash_id=create_uuid(),
@@ -104,3 +105,10 @@ def find_indices_in_list(needles: Collection, haystack: Collection) -> List[int]
 
 def is_number(x) -> bool:
     return isinstance(x, int) or isinstance(x, float)
+=======
+def get_pkg_data():
+    return os.path.join(os.path.dirname(constants.__file__), "data")
+
+def is_number(x):
+    return isinstance(x, int) or isinstance(x, float)
+>>>>>>> basic gene_db
