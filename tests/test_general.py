@@ -2,6 +2,7 @@ from walnut.common import FuzzyDict
 import tempfile
 import json
 import os
+from walnut.study import Study
 
 def test_fuzzy_dict():
     x = FuzzyDict({"a": 1, "b": 2})
@@ -63,3 +64,12 @@ def test_gallery():
     gallery = Gallery(gallery_folder, TextReader())
     gallery.read()
     assert len(gallery.get("asdasd")) == 1
+
+def test_run_info():
+    study_folder = tempfile.mkdtemp()
+    study = Study(study_folder)
+    
+    study.run_info.write()
+    assert study.run_info.get("species") == "human"
+    study.run_info.read()
+    assert study.run_info.get("species") == "human"

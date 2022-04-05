@@ -49,7 +49,7 @@ class RunInfo():
 
         now = common.get_timestamp()
         self.__content = RunInfoStruc(
-            hash_id = os.path.dirname(self.__file.path),
+            hash_id = os.path.basename(os.path.dirname(self.__file.path)),
             title = "Untitled study",
             species = "human",
             n_cell = 0,
@@ -96,8 +96,8 @@ class RunInfo():
             raise Exception("No data to read")
 
         content = common.FuzzyDict(self.__file.read())
-        hash_id = content.get("hash_id", "study_id", default=self.__content["title"])
-        if hash_id != self.__content["title"]:
+        hash_id = content.get("hash_id", "study_id", default=self.__content["hash_id"])
+        if hash_id != self.__content["hash_id"]:
             raise Exception("Study ID is not consistent with the folder name")        
         species = content.get("index_type", "species", default=self.__content["species"])
         if not isinstance(species, str):

@@ -40,14 +40,14 @@ class TextFile(FileIO[str]):
             return fopen.read()
 
     def write(self, text: str):
-        os.makedirs(os.path.dirname(self.path))
+        os.makedirs(os.path.dirname(self.path), exist_ok=True)
         with open(self.path, "w") as fopen:
             fopen.write(text)
 
 class JSONFile(FileIO[dict]):
     def __init__(self, filepath: str, CustomTextFile: Type[TextFile]):
         super().__init__(filepath)
-        self.__file = CustomTextFile(filepath)
+        self.__file: FileIO = CustomTextFile(filepath)
 
     def read(self) -> dict:
         json_str = self.__file.read()
