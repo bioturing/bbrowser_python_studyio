@@ -3,9 +3,19 @@ from uuid import uuid4
 from typing import Collection, List, Dict, Any, TypeVar, Generic, Type
 import numpy
 from abc import ABC, abstractmethod
+<<<<<<< HEAD
 import os
 import json
 from walnut.models import History
+=======
+from typing import Type, TypeVar, Generic
+from walnut import constants
+
+try:
+    from typing import TypedDict
+except:
+    from typing_extensions import TypedDict
+>>>>>>> basic run info
 
 FileContent = TypeVar("FileContent")
 
@@ -59,6 +69,20 @@ class FuzzyDict(dict):
     def __len__(self):
         return len(self.keys())
 
+class Commit(TypedDict):
+    description: str
+    hash_id: str
+    created_by: str
+    created_at: constants.NUM
+
+def create_commit(**kwargs) -> Commit:
+    commit = Commit(description="No description", hash_id=create_uuid(),
+                    created_at=get_timestamp(),
+                    created_by="support@bioturing.com")
+    for key in kwargs:
+        commit[key] = kwargs[key]
+    return commit
+
 def get_timestamp():
     return time.time() * 1000
 
@@ -80,3 +104,6 @@ def find_indices_in_list(needles: Collection, haystack: Collection) -> List[int]
         index[item] = i
 
     return [index.get(item, -1) for item in needles]
+
+def is_number(x) -> bool:
+    return isinstance(x, int) or isinstance(x, float)

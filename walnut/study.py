@@ -7,6 +7,7 @@ from walnut.gallery import Gallery
 from walnut.expression import Expression
 from walnut.run_info import RunInfo
 from walnut.readers import TextReader
+from walnut.gene_db import GeneDB
 
 class StudyStructure:
     def __init__(self, study_folder):
@@ -20,6 +21,7 @@ class StudyStructure:
         self.metadata = os.path.join(self.path, "main", "metadata")
         self.dimred = os.path.join(self.main_dir, "dimred")
         self.h5matrix = os.path.join(self.path, "main", "matrix.hdf5")
+        self.gene_db = os.path.join(self.main_dir, "gene")
 
 class Study:
     def __init__(self, study_folder, CustomTextFile: FileIO=TextFile):
@@ -30,3 +32,4 @@ class Study:
         self.run_info = RunInfo(self.__location.run_info, self.__TextFile)
         self.dimred = Dimred(self.__location.dimred, self.__TextFile)
         self.gallery = Gallery(self.__location.main_dir, TextReader())
+        self.gene_db = GeneDB(self.__location.gene_db, self.run_info.get("species"))
