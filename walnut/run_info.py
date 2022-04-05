@@ -1,38 +1,42 @@
-from pydantic import BaseModel
-from typing import Tuple, List
+from typing import Tuple, List, Dict
 from walnut import constants
 from walnut.common import FileIO
 
-class UnitSettings(BaseModel):
+try:
+    from typing import TypedDict
+except:
+    from typing_extensions import TypedDict
+
+class UnitSettings(TypedDict):
     type: constants.UNIT_TYPE_LIST
     transform: constants.UNIT_TRANSFORM_LIST
 
-class Commit(BaseModel):
+class Commit(TypedDict):
     description: str
     hash_id: str
     created_by: str
     created_at: constants.NUM
 
-class FilterSetting(BaseModel):
+class FilterSetting(TypedDict):
     cell: int
     gene: Tuple[int, int]
     mito: int
     top: int
 
-class AnaSetting(BaseModel):
+class AnaSetting(TypedDict):
     inputType: List[constants.INPUT_FORMAT_LIST]
     normMethod: constants.NORMALIZATION_LIST
     filter: FilterSetting
 
-class RunInfoStr(BaseModel):
+class RunInfoStr(TypedDict):
     hash_id: str
     title: str
     species: constants.SPECIES_LIST
     n_cell: int
     omics: List[constants.OMICS_LIST]
-    unit_settings: dict[constants.OMICS_LIST, UnitSettings]
+    unit_settings: Dict[constants.OMICS_LIST, UnitSettings]
     modified_date: constants.NUM
-    misc: dict[str, str]
+    misc: Dict[str, str]
     papers: List[str]
     abstract: str
     author: List[str]
