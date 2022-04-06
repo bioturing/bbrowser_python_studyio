@@ -1,9 +1,12 @@
-import json
-import os
 import time
 from uuid import uuid4
+from typing import Collection, List, Dict, Any, TypeVar, Generic, Type
+import numpy
 from abc import ABC, abstractmethod
-from typing import Type, TypeVar, Generic
+import os
+import json
+
+from walnut.models import History
 
 FileContent = TypeVar("FileContent")
 
@@ -62,3 +65,19 @@ def get_timestamp():
 
 def create_uuid():
     return str(uuid4()).replace("-", "")
+
+def create_history() -> History:
+    return History(created_by="walnut", created_at=time.time(),
+                    hash_id=create_uuid(),
+                    description="Created automatically")
+
+
+def find_indices_in_list(needles: Collection, haystack: Collection) -> List[int]:
+    if len(numpy.unique(haystack)) != len(haystack):
+        raise ValueError("haystack must not contain any duplicate items")
+
+    index: Dict[Any, int] = {}
+    for i, item in enumerate(haystack):
+        index[item] = i
+
+    return [index.get(item, -1) for item in needles]

@@ -24,7 +24,7 @@ class Study:
     def __init__(self, study_folder, CustomTextFile: FileIO=TextFile):
         self.__location = StudyStructure(study_folder)
         self.__TextFile = CustomTextFile
-        self.metadata = Metadata(self.__location.metadata, self.__TextFile)
+        #self.metadata = Metadata(self.__location.metadata, self.__TextFile)
         self.expression = Expression(self.__location.h5matrix)
         self.run_info = RunInfo(self.__location.run_info, self.__TextFile)
         self.dimred = Dimred(self.__location.dimred, self.__TextFile)

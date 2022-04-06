@@ -17,3 +17,7 @@ INPUT_FORMAT_LIST = Literal["fullMatrix", "mtx", "h5matrix",
                             "crisprFullMatrix", "visium", "h5visium", "bcs",
                             "seurat", "scanpy", "loomAmgen", "fastq"]
 NORMALIZATION_LIST = Literal["none", "lognorm"]
+
+UNASSIGNED = "Unassigned"
+METADATA_TYPE_NUMERIC = "numeric"
+METADATA_TYPE_CATEGORICAL = "category"
