@@ -50,8 +50,8 @@ class Study:
                 self.gene_db.create(self.expression.features())
     
     def exists(self) -> bool:
-        return self.run_info.exists()
-    
+        return self.run_info.exists() and self.expression.exists()
+
     def create_gene_collection(self, name: str, gene_name: List[str]) -> str:
         """Create a gene collection given a list of genes"""
         if not self.gene_db.is_id(gene_name): # convert name to ID

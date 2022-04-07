@@ -12,13 +12,14 @@ class GeneTableSQL(common.FileIO):
         return df
     
     def write(self, df: pd.DataFrame):
+        os.makedirs(os.path.dirname(self.path), exist_ok=True)
         with sqlite3.connect(self.path) as con:
             df.to_sql("gene_name", con)
 
 class GeneDB:
     def __init__(self, gene_db_dir, species):
         self.__file = GeneTableSQL(os.path.join(gene_db_dir, '%s.db' % species))
-        self.__df = pd.DataFrame(columns=["gene_id", "gene_name", "primary"])
+        self.__df = pd.DataFrame(columns=["gene_id", "name", "primary"])
     
     def exists(self):
         return self.__file.exists()
@@ -64,6 +65,12 @@ class GeneDB:
         valid = np.sum(np.isin(pre_in, pre_ref))
         prc_valid = valid * 100 / len(ids)
         return prc_valid > 50
+    
+    def to_df(self) -> pd.DataFrame:
+        return self.__df
+    
+    def from_df(self, df: pd.DataFrame):
+        self.__df = df
 
 class StudyGeneDB(GeneDB):
     def __init__(self, gene_db_dir, species):
@@ -71,13 +78,16 @@ class StudyGeneDB(GeneDB):
         self.__ref = GeneDB(common.get_pkg_data(), species)
 
     def create(self, gene_id: List[str], gene_name: List[str]=None):
+        """Create gene DB for a study given a list of genes (usually from matrix.hdf5)"""
         if not gene_name:
+            self.__ref.read() # Load gene db
             if self.__ref.is_id(gene_id):
                 gene_name = self.__ref.convert(gene_id, _from="gene_id", _to="name")
             else:
                 gene_name = gene_id
                 gene_id = self.__ref.convert(gene_id)
-        
-        self.__df = pd.DataFrame({"gene_id": gene_id, "name": gene_name, "primary": 1})
-        self.write()        
+
+        df = pd.DataFrame({"gene_id": gene_id, "name": gene_name, "primary": 1})
+        self.from_df(df)
+        self.write()
         

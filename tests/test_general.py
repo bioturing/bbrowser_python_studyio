@@ -4,6 +4,7 @@ import json
 import os
 from walnut.study import Study
 from walnut.gene_db import GeneDB
+from walnut import common
 
 def test_fuzzy_dict():
     x = FuzzyDict({"a": 1, "b": 2})
@@ -23,8 +24,8 @@ def test_create_gene_collection():
     study = Study(study_folder)
 
     # Test initializing from json
-    imm_id = study.gallery.create_gene_collection("immune", ["CD3D", "NKG7", "CD79A"])
-    tcell_id = study.gallery.create_gene_collection("T cells", ["CD3D", "CD8A"])
+    imm_id = study.create_gene_collection("immune", ["CD3D", "NKG7", "CD79A"])
+    tcell_id = study.create_gene_collection("T cells", ["CD3D", "CD8A"])
     json_str = study.gallery.to_json()
     cfg = json.loads(json_str)
     assert len(cfg) == 2
@@ -75,7 +76,7 @@ def test_run_info():
     study.run_info.read()
     assert study.run_info.get("species") == "human"
 
-def test_gene_conversion():
+def test_gene_db_conversion():
     gene_db = GeneDB("C:/Users/lequa/Documents/bbrowser_python_studyio/walnut/data", "human")
     gene_db.read()
     ids = gene_db.convert(["CD3D", "CD79A"])
@@ -83,3 +84,14 @@ def test_gene_conversion():
     names = gene_db.convert(ids, _from="gene_id", _to="name")
     assert names == ["CD3D", "CD79A"]
     assert gene_db.is_id(ids)
+
+def test_gene_db_creation():
+    study_folder = tempfile.mkdtemp()
+    study = Study(study_folder)
+    study.gene_db.create(["CD3D", "CD79A", "TRILE", "CCL5", "EPCAM"])
+    study.gene_db.read()
+    df = study.gene_db.to_df()
+    assert df.index.size == 5
+    db = GeneDB(common.get_pkg_data(), study.run_info.get("species"))
+    db.read()
+    assert db.is_id(df["gene_id"])
