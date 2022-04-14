@@ -93,7 +93,6 @@ class Metadata:
                                                                         cluster_names))
             if -1 in new_category.clusters:
                 raise Exception("There is a huge bug in code")
-                #assert("There is a huge bug in code")
 
         category_meta = CategoryMeta(**category_base.dict())
         self.__metalist.add_category(category_meta)

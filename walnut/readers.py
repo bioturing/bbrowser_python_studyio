@@ -5,9 +5,10 @@ from Crypto.Cipher import AES
 from Crypto.Util import Counter
 import json
 from typing import Tuple
+import os
 
-#Returns iv and decrypted text, both are 'bytes' objects
 def encrypt(key: bytes, plaintext: bytes) -> Tuple[bytes, bytes]:
+    """Returns iv and decrypted text, both are 'bytes' objects"""
     assert len(key) == 32, "Only accepts 32-byte keys"
 
     # Choose a random, 16-byte IV.
@@ -22,8 +23,9 @@ def encrypt(key: bytes, plaintext: bytes) -> Tuple[bytes, bytes]:
     ciphertext = aes.encrypt(plaintext)
     return (iv, ciphertext)
 
-#Takes iv and decrypted text as inputs ('bytes' objects), returns encrypted text.
 def decrypt(key: bytes, iv: bytes, ciphertext: bytes):
+    """Takes iv and decrypted text as inputs ('bytes' objects), returns encrypted text"""
+
     # Initialize counter for decryption. iv should be the same as the output of
     # encrypt().
     iv_int = int.from_bytes(iv, "big")
@@ -63,6 +65,7 @@ class TextReader(Reader):
             return fopen.read()
 
     def write(self, content: str, filepath: str) -> None:
+        os.makedirs(os.path.dirname(filepath), exist_ok=True)
         with open(filepath, "w") as fopen:
             fopen.write(content)
 

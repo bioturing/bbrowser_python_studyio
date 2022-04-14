@@ -41,7 +41,7 @@ class IOCategory(IOConverter[Category]):
     def from_str(s: str) -> Category:
         content = json.loads(s)
         if isinstance(content, dict):
-            return Category.parse_obj(json.loads(s))
+            return Category.parse_obj(content)
         else:
             return Category(clusters=content)
 

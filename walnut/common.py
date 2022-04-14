@@ -5,7 +5,6 @@ import numpy
 from abc import ABC, abstractmethod
 import os
 import json
-
 from walnut.models import History
 
 FileContent = TypeVar("FileContent")

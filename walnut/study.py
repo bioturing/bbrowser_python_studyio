@@ -6,6 +6,7 @@ from walnut.dimred import Dimred
 from walnut.gallery import Gallery
 from walnut.expression import Expression
 from walnut.run_info import RunInfo
+from walnut.readers import TextReader
 
 class StudyStructure:
     def __init__(self, study_folder):
@@ -28,4 +29,4 @@ class Study:
         self.expression = Expression(self.__location.h5matrix)
         self.run_info = RunInfo(self.__location.run_info, self.__TextFile)
         self.dimred = Dimred(self.__location.dimred, self.__TextFile)
-        self.gallery = Gallery(self.__location.main_dir, self.__TextFile)
+        self.gallery = Gallery(self.__location.main_dir, TextReader())

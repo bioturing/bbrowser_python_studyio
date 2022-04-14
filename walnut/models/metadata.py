@@ -3,22 +3,15 @@ from pydantic import BaseModel, validator
 import numpy
 
 from walnut.models import History
-from walnut import constants
+from walnut import constants, common
 
 class CategoryBase(BaseModel):
     id: Optional[str]
     name: Optional[str]
-    type: Optional[str]
+    type: Optional[constants.METADATA_TYPE_LIST]
     clusterName: Optional[List[str]]
     clusterLength: Optional[List[int]]
     history: Optional[List[History]]
-
-    @validator("type")
-    def type_must_in_list(cls, v):
-        if v not in [constants.METADATA_TYPE_CATEGORICAL, constants.METADATA_TYPE_NUMERIC]:
-            raise ValueError("\"type\" must be either \"%s\" or \"%s\""
-                                % (constants.METADATA_TYPE_CATEGORICAL, constants.METADATA_TYPE_NUMERIC))
-        return v
 
     @validator("clusterName", "clusterLength", pre=True)
     def ignore_if_numerical_type(cls, v, values: dict):
@@ -30,18 +23,30 @@ class CategoryBase(BaseModel):
 class CategoryMeta(CategoryBase):
     id: str
     name: str
-    history: List[History]
+    history: Optional[List[History]]
     type: str = constants.METADATA_TYPE_CATEGORICAL
     clusterName: List[str]
     clusterLength: List[int]
 
+    @validator("history", pre=True)
+    def set_history(cls, history):
+        return history or [common.create_history()]
+
 class Category(CategoryBase):
-    clusters: List[Union[int, float]]
+    clusters: List[constants.NUM]
 
 class Metalist(BaseModel):
     version: Optional[int]
     default: Optional[str]
     content: Dict[str, CategoryMeta]
+
+    @validator("content", pre=True)
+    def set_content_id(cls, content):
+        for id in content:
+            if not id in content[id]:
+                content[id]["id"] = id
+            content[id] = CategoryMeta.parse_obj(content[id])
+        return content
 
     def get_category_ids(self) -> List[str]:
         return [x for x in self.content.keys()]

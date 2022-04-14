@@ -1,6 +1,7 @@
 from walnut.common import FuzzyDict
 import tempfile
 import json
+import os
 
 def test_fuzzy_dict():
     x = FuzzyDict({"a": 1, "b": 2})
@@ -9,7 +10,12 @@ def test_fuzzy_dict():
     val = x.get("B")
     assert val is None
 
-def test_gallery():
+def test_history():
+    from walnut.models.history import History
+    h = History.parse_obj({"created_by": "walnut", "created_at": 123, "hash_id": "acbs", "message": "test"})
+    assert h.description == "test"
+
+def test_create_gene_collection():
     from walnut.study import Study
     study_folder = tempfile.mkdtemp()
     study = Study(study_folder)
@@ -32,3 +38,22 @@ def test_gallery():
     study.gallery.read()
     assert len(study.gallery.get(imm_id)) == 3
     assert len(study.gallery.get(tcell_id)) == 2
+
+def test_gallery():
+    from walnut.gallery import Gallery
+    from walnut.readers import TextReader
+    gallery_folder = tempfile.mkdtemp()
+    with open(os.path.join(gallery_folder, "gene_gallery_2.json"), "w") as fopen:
+        json.dump([{
+            "name": "test",
+            "type": "RNA",
+            "items": [],
+            "id": "asdasd",
+            "created_at": 1234,
+            "last_modified": 1234,
+            "created_by": "test@bioturing.com",
+        }], fopen)
+    
+    gallery = Gallery(gallery_folder, TextReader())
+    gallery.read()
+    print(gallery.collections)
