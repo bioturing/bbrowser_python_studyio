@@ -141,6 +141,7 @@ class Metadata:
                     **self.__metalist.get_category_meta(category_id).dict()
                 }
                 category = Category.parse_obj(items)
+                self.__categories[category_id] = category
             except pydantic.ValidationError as e:
                 print("WARNING: Unable to parse category %s due to error: %s"
                         % (category_id, str(e)))
@@ -148,7 +149,6 @@ class Metadata:
                 print("WARNING: Unable to read category %s due to error: %s"
                         % (category_id, str(e)))
 
-            self.__categories[category_id] = category
 
     def __purge_invalid_categories(self) -> None:
         existing_categories_id = [id for id in self.__categories]

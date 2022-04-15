@@ -23,13 +23,13 @@ class CategoryBase(BaseModel):
 class CategoryMeta(CategoryBase):
     id: str
     name: str
-    history: List[History] = common.create_history()
+    history: List[History] = [common.create_history()]
     type: str = constants.METADATA_TYPE_CATEGORICAL
     clusterName: List[str]
     clusterLength: List[int]
 
 class Category(CategoryBase):
-    clusters: List[constants.NUM]
+    clusters: Union[List[int], List[float]]
 
 class Metalist(BaseModel):
     version: Optional[int]
