@@ -9,11 +9,6 @@ from walnut.models import History
 from typing import Type, TypeVar, Generic
 from walnut import constants
 
-try:
-    from typing import TypedDict, Type
-except:
-    from typing_extensions import TypedDict, Type
-
 FileContent = TypeVar("FileContent")
 
 class FileIO(ABC, Generic[FileContent]):

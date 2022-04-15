@@ -9,7 +9,7 @@ class Expression:
 
     def features(self):
         with h5py.File(self.path, "r") as fopen:
-            ft = fopen["bioturing/features"]
+            ft = fopen["bioturing/features"][:]
         return ft
     
     # TODO: needs more APIs

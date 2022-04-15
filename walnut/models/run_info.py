@@ -13,7 +13,7 @@ class UnitSettings(BaseModel):
 
 class FilterSetting(BaseModel):
     cell: int = 0
-    gene: Tuple[int, int] = [0, 0]
+    gene: Tuple[int, int] = (0, 0)
     mito: int = 100
     top: int = 2000
 
@@ -28,7 +28,7 @@ class RunInfo(BaseModel):
     n_cell: int
     species: constants.SPECIES_LIST = "human"
     omics: List[constants.OMICS_LIST] = ["RNA"]
-    unit_settings: Dict[constants.OMICS_LIST, UnitSettings] = UnitSettings()
+    unit_settings: UnitSettings = UnitSettings()
     modified_date: constants.NUM = common.get_timestamp()
     misc: Dict[str, str] = {}
     papers: List[str] = []
