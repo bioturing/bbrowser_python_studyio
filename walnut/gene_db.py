@@ -9,7 +9,7 @@ from walnut.readers import SQLReader
 
 class GeneDB:
     def __init__(self, gene_db_dir, species):
-        self.__file = FileIO(os.path.join(gene_db_dir, '%s.db' % species), SQLReader(), IOAsIs)
+        self.__file = FileIO[pd.DataFrame](os.path.join(gene_db_dir, '%s.db' % species), SQLReader(), IOAsIs)
         self.__df = pd.DataFrame(columns=["gene_id", "name", "primary"])
     
     def exists(self):
@@ -28,27 +28,21 @@ class GeneDB:
 
     def convert(self, names: List[str], _from: str="name", _to: str="gene_id") -> List[str]:
         """Convert a list of genes to symbols or IDs"""
-        id_dict = {}
         ids = []
         prim = self.__df[self.__df["primary"] == 1]
         alias = self.__df[self.__df["primary"] == 0]
-        for name in names:
-            id = id_dict.get(name)
-            if id:
-                ids.append(id)
-                continue
+        mapping = {}
 
-            id = prim[prim[_from] == name][_to]
-            if id.size > 0:
-                id = id.tolist()[0]
-            else:
-                id = alias[alias[_from] == name][_to]
-                if id.size > 0:
-                    id = id.tolist()[0]
-                else:
-                    id = name
-            id_dict[name] = id
-            ids.append(id)
+        for _, item in prim.iterrows():
+            if not item[_from] in mapping:
+                mapping[item[_from]] = item[_to]
+        
+        for _, item in alias.iterrows():
+            if not item[_from] in mapping:
+                mapping[item[_from]] = item[_to]
+
+        for name in names:
+            ids.append(mapping.get(name, name))
         return ids
     
     def is_id(self, ids: List[str]) -> bool:
