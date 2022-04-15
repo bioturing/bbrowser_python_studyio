@@ -67,20 +67,6 @@ class FuzzyDict(dict):
     def __len__(self):
         return len(self.keys())
 
-class Commit(TypedDict):
-    description: str
-    hash_id: str
-    created_by: str
-    created_at: constants.NUM
-
-def create_commit(**kwargs) -> Commit:
-    commit = Commit(description="No description", hash_id=create_uuid(),
-                    created_at=get_timestamp(),
-                    created_by="support@bioturing.com")
-    for key in kwargs:
-        commit[key] = kwargs[key]
-    return commit
-
 def get_timestamp():
     return time.time() * 1000
 

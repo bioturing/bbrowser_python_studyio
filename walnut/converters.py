@@ -2,7 +2,8 @@ from typing import TypeVar, Generic, Any
 from abc import ABC, abstractmethod
 import json
 
-from walnut.models import Category, Metalist, GeneCollections
+from walnut.models import Category, Metalist, GeneCollections, RunInfo
+from walnut import common
 
 OUT_TYPE = TypeVar("OUT_TYPE")
 
@@ -67,4 +68,19 @@ class IOGallery(IOConverter[GeneCollections]):
 
     @staticmethod
     def to_str(content: GeneCollections) -> str:
+        return content.json()
+
+class IORunInfo(IOConverter[RunInfo]):
+    @staticmethod
+    def from_str(s: str) -> RunInfo:
+        content = common.FuzzyDict(json.loads(s))
+        content["hash_id"] = content.get("hash_id", "study_id")    
+        content["species"] = content.get("index_type", "species")
+        content["n_cell"] = content.get("n_cell", "n_samples")
+        content["omics"] = content.get("dataType", "omics", default=["RNA"])
+        content["title"] = content.get("title", "name", default="Untitled study")
+        return RunInfo.parse_obj(content)
+
+    @staticmethod
+    def to_str(content: RunInfo) -> str:
         return content.json()

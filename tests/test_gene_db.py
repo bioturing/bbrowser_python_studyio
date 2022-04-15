@@ -19,6 +19,6 @@ def test_gene_db_creation():
     study.gene_db.read()
     df = study.gene_db.to_df()
     assert df.index.size == 5
-    db = GeneDB(common.get_pkg_data(), study.run_info.get("species"))
+    db = GeneDB(common.get_pkg_data(), study.run_info.get_species())
     db.read()
     assert db.is_id(df["gene_id"])

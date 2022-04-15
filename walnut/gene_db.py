@@ -53,10 +53,10 @@ class GeneDB:
         return prc_valid > 50
     
     def to_df(self) -> pd.DataFrame:
-        return self.__df
+        return self.__df.copy()
     
     def from_df(self, df: pd.DataFrame):
-        self.__df = df
+        self.__df = df.copy()
 
 class StudyGeneDB(GeneDB):
     def __init__(self, gene_db_dir, species):

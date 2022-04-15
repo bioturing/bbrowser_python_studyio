@@ -1,11 +1,11 @@
 import os
 
 try:
-    from typing import Type, List
+    from typing import List
 except:
-    from typing_extensions import Type, List
+    from typing_extensions import List
 
-from walnut.common import FileIO, TextFile
+from walnut.readers import Reader
 from walnut.metadata import Metadata
 from walnut.dimred import Dimred
 from walnut.gallery import Gallery
@@ -29,15 +29,14 @@ class StudyStructure:
         self.gene_db = os.path.join(self.main_dir, "gene")
 
 class Study:
-    def __init__(self, study_folder, CustomTextFile: Type[FileIO]=TextFile):
+    def __init__(self, study_folder, reader: Reader = TextReader()):
         self.__location = StudyStructure(study_folder)
-        self.__TextFile = CustomTextFile
         #self.metadata = Metadata(self.__location.metadata, self.__TextFile)
         self.expression = Expression(self.__location.h5matrix)
-        self.run_info = RunInfo(self.__location.run_info, self.__TextFile)
-        self.dimred = Dimred(self.__location.dimred, self.__TextFile)
-        self.gene_db = StudyGeneDB(self.__location.gene_db, self.run_info.get("species"))
-        self.gallery = Gallery(self.__location.main_dir, TextReader())
+        self.run_info = RunInfo(self.__location.run_info, reader)
+        # self.dimred = Dimred(self.__location.dimred, self.__TextFile)
+        self.gene_db = StudyGeneDB(self.__location.gene_db, self.run_info.get_species())
+        self.gallery = Gallery(self.__location.main_dir, TextReader()) # Gallery is not encrypted
 
         # If the study exists, ensure gene_db is loaded so that other APIs
         # for genes can be converted correctly
