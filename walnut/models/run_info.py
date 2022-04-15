@@ -50,3 +50,12 @@ class RunInfo(BaseModel):
     @validator("n_batch", always=True)
     def set_vn_batch(cls, _, values):
         return len(values["ana_setting"].inputType)
+    
+    @validator("unit_settings", pre=True)
+    def set_unit_settings(cls, value: dict):
+        settings = {}
+        for omic in constants.OMICS_LIST.__args__:
+            settings[omic] = OmicUnitSettings.parse_obj(
+                value.get(omic, {"type": "raw" if omic == "PRTB" else "norm", "transform": "none"})
+            )
+        return UnitSettings.parse_obj(settings)
