@@ -4,7 +4,8 @@ version = "0.1.0"
 description = "Read or write a BBrowser study"
 authors = [
     "Tri Le <tri@bioturing.com>",
-    "Vu Nguyen <vu@bioturing.com>"
+    "Vu Nguyen <vu@bioturing.com>",
+    "Hao Tran <hao@bioturing.com>"
 ]
 license = "LICENSE"
 readme = "README.md"
