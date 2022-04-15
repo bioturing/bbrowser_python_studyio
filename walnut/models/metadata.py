@@ -39,7 +39,7 @@ class Metalist(BaseModel):
     @validator("content", pre=True)
     def set_content_id(cls, content):
         for id in content:
-            if not id in content[id]:
+            if not "id" in content[id]:
                 content[id]["id"] = id
             content[id] = CategoryMeta.parse_obj(content[id])
         return content
