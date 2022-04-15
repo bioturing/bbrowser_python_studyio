@@ -23,14 +23,10 @@ class CategoryBase(BaseModel):
 class CategoryMeta(CategoryBase):
     id: str
     name: str
-    history: Optional[List[History]]
+    history: List[History] = common.create_history()
     type: str = constants.METADATA_TYPE_CATEGORICAL
     clusterName: List[str]
     clusterLength: List[int]
-
-    @validator("history", pre=True)
-    def set_history(cls, history):
-        return history or [common.create_history()]
 
 class Category(CategoryBase):
     clusters: List[constants.NUM]
