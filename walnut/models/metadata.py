@@ -24,7 +24,7 @@ class CategoryMeta(CategoryBase):
     id: str
     name: str
     history: List[History] = [common.create_history()]
-    type: str = constants.METADATA_TYPE_CATEGORICAL
+    type: constants.METADATA_TYPE_LIST = constants.METADATA_TYPE_CATEGORICAL
     clusterName: List[str]
     clusterLength: List[int]
 

@@ -1,26 +1,11 @@
 import os
-import sqlite3
 import pandas as pd
 from walnut import common
 from typing import List
 import numpy as np
 from walnut.converters import IOAsIs
-from walnut.readers import Reader
 from walnut.FileIO import FileIO
-import json
-
-class SQLReader(Reader):
-    @staticmethod
-    def read(filepath: str) -> pd.DataFrame:
-        with sqlite3.connect(filepath) as con:
-            df = pd.read_sql_query("SELECT * FROM gene_name", con)
-        return df
-    
-    @staticmethod
-    def write(df: pd.DataFrame, filepath: str):
-        os.makedirs(os.path.dirname(filepath), exist_ok=True)
-        with sqlite3.connect(filepath) as con:
-            df.to_sql("gene_name", con)
+from walnut.readers import SQLReader
 
 class GeneDB:
     def __init__(self, gene_db_dir, species):
@@ -42,6 +27,7 @@ class GeneDB:
         self.__file.write(self.__df)
 
     def convert(self, names: List[str], _from: str="name", _to: str="gene_id") -> List[str]:
+        """Convert a list of genes to symbols or IDs"""
         id_dict = {}
         ids = []
         prim = self.__df[self.__df["primary"] == 1]
