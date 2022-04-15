@@ -47,7 +47,13 @@ def test_gallery():
         json.dump([{
             "name": "test",
             "type": "RNA",
-            "items": [],
+            "items": [{
+                "name": "test",
+                "id": "test0",
+                "created_at": 1234,
+                "last_modified": 1234,
+                "features": ["CD3D"],
+            }],
             "id": "asdasd",
             "created_at": 1234,
             "last_modified": 1234,
@@ -56,4 +62,4 @@ def test_gallery():
     
     gallery = Gallery(gallery_folder, TextReader())
     gallery.read()
-    print(gallery.collections)
+    assert len(gallery.get("asdasd")) == 1
