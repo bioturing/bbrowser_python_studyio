@@ -17,6 +17,7 @@ except:
 FileContent = TypeVar("FileContent")
 
 class FileIO(ABC, Generic[FileContent]):
+    """(deprecated)"""
     def __init__(self, filepath: str):
         self.path = filepath
 

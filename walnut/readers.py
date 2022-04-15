@@ -4,7 +4,7 @@ from Crypto import Random
 from Crypto.Cipher import AES
 from Crypto.Util import Counter
 import json
-from typing import Tuple
+from typing import Tuple, Any
 import os
 
 def encrypt(key: bytes, plaintext: bytes) -> Tuple[bytes, bytes]:
@@ -52,11 +52,11 @@ def encrypt_json(key: str, obj: dict) -> dict:
 
 class Reader(ABC):
     @abstractmethod
-    def read(self, filepath: str) -> str:
+    def read(self, filepath: str) -> Any:
         pass
 
     @abstractmethod
-    def write(self, content: str, filepath: str) -> None:
+    def write(self, content: Any, filepath: str) -> None:
         pass
 
 class TextReader(Reader):

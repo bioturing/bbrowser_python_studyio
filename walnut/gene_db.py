@@ -4,21 +4,27 @@ import pandas as pd
 from walnut import common
 from typing import List
 import numpy as np
+from walnut.converters import IOAsIs
+from walnut.readers import Reader
+from walnut.FileIO import FileIO
+import json
 
-class GeneTableSQL(common.FileIO):
-    def read(self) -> pd.DataFrame:
-        with sqlite3.connect(self.path) as con:
+class SQLReader(Reader):
+    @staticmethod
+    def read(filepath: str) -> pd.DataFrame:
+        with sqlite3.connect(filepath) as con:
             df = pd.read_sql_query("SELECT * FROM gene_name", con)
         return df
     
-    def write(self, df: pd.DataFrame):
-        os.makedirs(os.path.dirname(self.path), exist_ok=True)
-        with sqlite3.connect(self.path) as con:
+    @staticmethod
+    def write(df: pd.DataFrame, filepath: str):
+        os.makedirs(os.path.dirname(filepath), exist_ok=True)
+        with sqlite3.connect(filepath) as con:
             df.to_sql("gene_name", con)
 
 class GeneDB:
     def __init__(self, gene_db_dir, species):
-        self.__file = GeneTableSQL(os.path.join(gene_db_dir, '%s.db' % species))
+        self.__file = FileIO(os.path.join(gene_db_dir, '%s.db' % species), SQLReader(), IOAsIs)
         self.__df = pd.DataFrame(columns=["gene_id", "name", "primary"])
     
     def exists(self):
