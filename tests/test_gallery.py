@@ -16,8 +16,8 @@ def test_create_gene_collection():
     assert len(cfg[0]["items"]) == 3
     assert len(cfg[1]["items"]) == 2
     study.gallery.from_json(json_str)
-    assert len(study.gallery.get(imm_id)) == 3
-    assert len(study.gallery.get(tcell_id)) == 2
+    assert study.gallery.get(imm_id) == ['ENSG00000167286', 'ENSG00000105374', 'ENSG00000105369']
+    assert study.gallery.get(tcell_id) == ['ENSG00000167286', 'ENSG00000153563']
 
 def test_version_1():
     from walnut.gallery import Gallery

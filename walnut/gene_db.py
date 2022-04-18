@@ -62,11 +62,11 @@ class StudyGeneDB(GeneDB):
     def __init__(self, gene_db_dir, species):
         super().__init__(gene_db_dir, species)
         self.__ref = GeneDB(common.get_pkg_data(), species)
+        self.__ref.read()
 
     def create(self, gene_id: List[str], gene_name: List[str]=None):
         """Create gene DB for a study given a list of genes (usually from matrix.hdf5)"""
         if not gene_name:
-            self.__ref.read() # Load gene db
             if self.__ref.is_id(gene_id):
                 gene_name = self.__ref.convert(gene_id, _from="gene_id", _to="name")
             else:
@@ -76,4 +76,15 @@ class StudyGeneDB(GeneDB):
         df = pd.DataFrame({"gene_id": gene_id, "name": gene_name, "primary": 1})
         self.from_df(df)
         self.write()
-        
+    
+    def convert(self, names: List[str], _from: str="name", _to: str="gene_id", use_ref: bool=False) -> List[str]:
+        if (not use_ref) and self.exists():
+            return super().convert(names, _from, _to)
+        else:
+            return self.__ref.convert(names, _from, _to)
+    
+    def is_id(self, ids: List[str], use_ref: bool=False) -> bool:
+        if (not use_ref) and self.exists():
+            return super().is_id(ids)
+        else:
+            return self.__ref.is_id(ids)
