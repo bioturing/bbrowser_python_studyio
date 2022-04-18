@@ -9,24 +9,34 @@ class CategoryBase(BaseModel):
     id: Optional[str]
     name: Optional[str]
     type: Optional[constants.METADATA_TYPE_LIST]
-    clusterName: Optional[List[str]]
-    clusterLength: Optional[List[int]]
+    clusterName: Optional[List[str]] = []
+    clusterLength: Optional[List[int]] = []
     history: Optional[List[History]]
 
-    @validator("clusterName", "clusterLength", pre=True)
+    @validator("clusterName", "clusterLength", pre=True, always=True)
     def ignore_if_numerical_type(cls, v, values: dict):
         if values.get("type") == constants.METADATA_TYPE_NUMERIC:
             return []
         else:
             return v
 
+    @validator("clusterName")
+    def first_name_unassigned(cls, v, values: dict):
+        if values.get("type") == constants.METADATA_TYPE_CATEGORICAL:
+            if len(v) == 0:
+                raise ValueError("\"clusterName\" must not be empty")
+            if v[0] != constants.BIOTURING_UNASSIGNED:
+                raise ValueError("First value in \"clusterName\" must be \"%s\", not \"%s\""
+                                    % (constants.BIOTURING_UNASSIGNED, v[0]))
+        return v
+
 class CategoryMeta(CategoryBase):
     id: str
     name: str
     history: List[History] = [common.create_history()]
     type: constants.METADATA_TYPE_LIST = constants.METADATA_TYPE_CATEGORICAL
-    clusterName: List[str]
-    clusterLength: List[int]
+    clusterName: List[str] = []
+    clusterLength: List[int] = []
 
 class Category(CategoryBase):
     clusters: Union[List[int], List[float]]
