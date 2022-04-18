@@ -6,10 +6,13 @@ from abc import ABC, abstractmethod
 import os
 import json
 from walnut.models import History
+from typing import Type, TypeVar, Generic
+from walnut import constants
 
 FileContent = TypeVar("FileContent")
 
 class FileIO(ABC, Generic[FileContent]):
+    """(deprecated)"""
     def __init__(self, filepath: str):
         self.path = filepath
 
@@ -30,7 +33,7 @@ class TextFile(FileIO[str]):
             return fopen.read()
 
     def write(self, text: str):
-        os.makedirs(os.path.dirname(self.path))
+        os.makedirs(os.path.dirname(self.path), exist_ok=True)
         with open(self.path, "w") as fopen:
             fopen.write(text)
 
@@ -45,7 +48,7 @@ class JSONFile(FileIO[dict]):
 
     def write(self, obj: dict):
         json_str = json.dumps(obj)
-        self.__file.write(json_str)
+        self.__file.write(json_str)        
 
 class FuzzyDict(dict):
     """A dictionary where value can be obtained with multiple keys"""
@@ -80,3 +83,9 @@ def find_indices_in_list(needles: Collection, haystack: Collection) -> List[int]
         index[item] = i
 
     return [index.get(item, -1) for item in needles]
+
+def is_number(x) -> bool:
+    return isinstance(x, int) or isinstance(x, float)
+
+def get_pkg_data():
+    return os.path.join(os.path.dirname(constants.__file__), "data")

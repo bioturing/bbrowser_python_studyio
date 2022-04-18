@@ -1,30 +1,30 @@
-from typing import TypeVar, Generic
+from typing import TypeVar, Generic, Any
 from abc import ABC, abstractmethod
 import json
 
-from walnut.models import Category, Metalist
+from walnut.models import Category, Metalist, GeneCollections, RunInfo
+from walnut import common
 
-T = TypeVar("T")
+OUT_TYPE = TypeVar("OUT_TYPE")
 
-class IOConverter(ABC, Generic[T]):
+class IOConverter(ABC, Generic[OUT_TYPE]):
     @staticmethod
     @abstractmethod
-    def from_str(s: str) -> T:
+    def from_str(s: Any) -> OUT_TYPE:
         pass
 
     @staticmethod
     @abstractmethod
-    def to_str(content: T) -> str:
+    def to_str(content: OUT_TYPE) -> Any:
         pass
 
-
-class IOText(IOConverter[str]):
+class IOAsIs(IOConverter[OUT_TYPE]):
     @staticmethod
-    def from_str(s: str) -> str:
+    def from_str(s: OUT_TYPE) -> OUT_TYPE:
         return s
-
+    
     @staticmethod
-    def to_str(content: str) -> str:
+    def to_str(content: OUT_TYPE) -> OUT_TYPE:
         return content
 
 class IOJSON(IOConverter[dict]):
@@ -59,4 +59,28 @@ class IOMetalist(IOConverter[Metalist]):
 
     @staticmethod
     def to_str(content: Metalist) -> str:
+        return content.json()
+
+class IOGallery(IOConverter[GeneCollections]):
+    @staticmethod
+    def from_str(s: str) -> GeneCollections:
+        return GeneCollections(__root__=json.loads(s))
+
+    @staticmethod
+    def to_str(content: GeneCollections) -> str:
+        return content.json()
+
+class IORunInfo(IOConverter[RunInfo]):
+    @staticmethod
+    def from_str(s: str) -> RunInfo:
+        content = common.FuzzyDict(json.loads(s))
+        content["hash_id"] = content.get("hash_id", "study_id")    
+        content["species"] = content.get("index_type", "species")
+        content["n_cell"] = content.get("n_cell", "n_samples")
+        content["omics"] = content.get("dataType", "omics", default=["RNA"])
+        content["title"] = content.get("title", "name", default="Untitled study")
+        return RunInfo.parse_obj(content)
+
+    @staticmethod
+    def to_str(content: RunInfo) -> str:
         return content.json()

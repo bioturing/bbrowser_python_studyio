@@ -4,8 +4,10 @@ from Crypto import Random
 from Crypto.Cipher import AES
 from Crypto.Util import Counter
 import json
-from typing import Tuple
+from typing import Tuple, Any
 import os
+import sqlite3
+import pandas as pd
 
 def encrypt(key: bytes, plaintext: bytes) -> Tuple[bytes, bytes]:
     """Returns iv and decrypted text, both are 'bytes' objects"""
@@ -52,11 +54,11 @@ def encrypt_json(key: str, obj: dict) -> dict:
 
 class Reader(ABC):
     @abstractmethod
-    def read(self, filepath: str) -> str:
+    def read(self, filepath: str) -> Any:
         pass
 
     @abstractmethod
-    def write(self, content: str, filepath: str) -> None:
+    def write(self, content: Any, filepath: str) -> None:
         pass
 
 class TextReader(Reader):
@@ -85,3 +87,15 @@ class EncryptedTextReader(Reader):
         with open(filepath, "w") as fopen:
             json.dump(obj, fopen)
 
+class SQLReader(Reader):
+    @staticmethod
+    def read(filepath: str) -> pd.DataFrame:
+        with sqlite3.connect(filepath) as con:
+            df = pd.read_sql_query("SELECT * FROM gene_name", con)
+        return df
+    
+    @staticmethod
+    def write(df: pd.DataFrame, filepath: str):
+        os.makedirs(os.path.dirname(filepath), exist_ok=True)
+        with sqlite3.connect(filepath) as con:
+            df.to_sql("gene_name", con)
