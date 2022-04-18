@@ -2,7 +2,7 @@ from typing import TypeVar, Generic, Any
 from abc import ABC, abstractmethod
 import json
 
-from walnut.models import Category, Metalist, GeneCollections, RunInfo
+from walnut.models import Category, Metalist, GeneCollections, RunInfo, CategoryMeta
 from walnut import common
 
 OUT_TYPE = TypeVar("OUT_TYPE")
@@ -22,7 +22,7 @@ class IOAsIs(IOConverter[OUT_TYPE]):
     @staticmethod
     def from_str(s: OUT_TYPE) -> OUT_TYPE:
         return s
-    
+
     @staticmethod
     def to_str(content: OUT_TYPE) -> OUT_TYPE:
         return content
@@ -55,6 +55,19 @@ class IOMetalist(IOConverter[Metalist]):
         obj = json.loads(s)
         if "content" not in obj:
             obj = {"content": obj}
+
+        invalid_categories = []
+        for category_name in obj["content"]:
+            try:
+                CategoryMeta.parse_obj(obj["content"][category_name])
+            except Exception as e:
+                print("WARNING: Unable to parse category %s due to error: %s"
+                        % (category_name, str(e)))
+                invalid_categories.append(category_name)
+
+        for invalid_cate in invalid_categories:
+            del obj["content"][invalid_cate]
+
         return Metalist.parse_obj(obj)
 
     @staticmethod
@@ -74,7 +87,7 @@ class IORunInfo(IOConverter[RunInfo]):
     @staticmethod
     def from_str(s: str) -> RunInfo:
         content = common.FuzzyDict(json.loads(s))
-        content["hash_id"] = content.get("hash_id", "study_id")    
+        content["hash_id"] = content.get("hash_id", "study_id")
         content["species"] = content.get("index_type", "species")
         content["n_cell"] = content.get("n_cell", "n_samples")
         content["omics"] = content.get("dataType", "omics", default=["RNA"])

@@ -22,3 +22,4 @@ METADATA_TYPE_LIST = Literal["category", "numeric"]
 UNASSIGNED = "Unassigned"
 METADATA_TYPE_NUMERIC = "numeric"
 METADATA_TYPE_CATEGORICAL = "category"
+BIOTURING_UNASSIGNED = "Unassigned"
