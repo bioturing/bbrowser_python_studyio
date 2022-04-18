@@ -48,7 +48,7 @@ class RunInfo(BaseModel):
         return 16
 
     @validator("n_batch", always=True)
-    def set_vn_batch(cls, _, values):
+    def set_n_batch(cls, _, values):
         return len(values["ana_setting"].inputType)
     
     @validator("unit_settings", pre=True)

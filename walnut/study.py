@@ -1,10 +1,5 @@
 import os
-
-try:
-    from typing import List
-except:
-    from typing_extensions import List
-
+from typing import List
 from walnut.readers import Reader
 from walnut.metadata import Metadata
 from walnut.dimred import Dimred
