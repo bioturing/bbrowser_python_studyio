@@ -1,8 +1,4 @@
 from walnut.common import FuzzyDict
-from walnut.readers import TextReader
-import json
-import tempfile
-import os
 
 def test_fuzzy_dict():
     x = FuzzyDict({"a": 1, "b": 2})
