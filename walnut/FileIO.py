@@ -32,5 +32,9 @@ class FileIO(ABC, Generic[T]):
     def _write_file(self, content: str) -> None:
         self.reader.write(content, self.path)
 
+    def delete(self) -> None:
+        if self.exists():
+            os.remove(self.path)
+
     def write(self, content: T) -> None:
         self._write_file(self.converter.to_str(content))

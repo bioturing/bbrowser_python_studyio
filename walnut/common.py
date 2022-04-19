@@ -18,7 +18,11 @@ class FileIO(ABC, Generic[FileContent]):
 
     def exists(self) -> bool:
         return os.path.isfile(self.path)
-
+    
+    def delete(self):
+        if self.exists():
+            os.remove(self.path)
+    
     @abstractmethod
     def read(self) -> FileContent:
         pass
@@ -89,3 +93,6 @@ def is_number(x) -> bool:
 
 def get_pkg_data():
     return os.path.join(os.path.dirname(constants.__file__), "data")
+    
+def exc_to_str(e):
+    return "%s: %s" % (e.__class__.__name__, str(e))
