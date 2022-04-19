@@ -7,7 +7,7 @@ class DimredData(BaseModel):
 	id: Optional[str]=None
 	name: str
 	size: List[int]
-	history: Optional[List[History]] = [common.create_history()]
+	history: List[History] = [common.create_history()]
 	param: dict
 
 class DimredDataBasic(DimredData):
