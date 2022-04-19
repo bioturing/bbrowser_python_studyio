@@ -1,11 +1,13 @@
 from pydantic import BaseModel
 from typing import List, Optional
+from walnut.models import History
+from walnut import common
 
 class DimredData(BaseModel):
 	id: Optional[str]=None
 	name: str
 	size: List[int]
-	history: List[dict]=None
+	history: Optional[List[History]] = [common.create_history()]
 	param: dict
 
 class DimredDataBasic(DimredData):
