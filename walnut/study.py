@@ -26,10 +26,10 @@ class StudyStructure:
 class Study:
     def __init__(self, study_folder, reader: Reader = TextReader()):
         self.__location = StudyStructure(study_folder)
-        #self.metadata = Metadata(self.__location.metadata, self.__TextFile)
+        # self.metadata = Metadata(self.__location.metadata, reader)
         self.expression = Expression(self.__location.h5matrix)
         self.run_info = RunInfo(self.__location.run_info, reader)
-        # self.dimred = Dimred(self.__location.dimred, self.__TextFile)
+        self.dimred = Dimred(self.__location.dimred, reader)
         self.gene_db = StudyGeneDB(self.__location.gene_db, self.run_info.get_species())
         self.gallery = Gallery(self.__location.main_dir, TextReader()) # Gallery is not encrypted
 
