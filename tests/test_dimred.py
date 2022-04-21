@@ -104,10 +104,24 @@ META = {'data': {'a49318ce18434574ab922ddfad19f708': {'id': 'a49318ce18434574ab9
     'perplexity': 30,
     'method': 'tsne',
     'correction': 'none',
-    'seed': 2409}}},
+    'seed': 2409}},
+    
+    'abc': {'id': 'abc', # Invalid SingleDimredBase that should be purged
+          'name': 't-SNE',
+          'size': [3, 2],
+          'history': [{'created_by': 'abc@xyz.com',
+            'created_at': 1648786133023.62,
+            'hash_id': '184c8c5e73b64bb7a237e23b5064da1c',
+            'description': 'Created with BioTuring Browser'}],
+          'param': {'omics': 'RNA',
+            'dims': 2,
+            'perplexity': 30,
+            'method': 'tsne',
+            'correction': 'none',
+            'seed': 2409}}}, #          
   'version': 2,
   'bbrowser_version': '1.0.0',
-  'default': 'a49318ce18434574ab922ddfad19f708'}
+  'default': 'xyz'} #invalid default that will be deleted
 
 DIMRED = {'id': 'a49318ce18434574ab922ddfad19f708',
  'name': 't-SNE',

@@ -8,6 +8,7 @@ import pydantic
 from pydantic import validator, validate_arguments
 from typing import List, Union, Type
 import pandas as pd
+import numpy
 
 class Dimred:
 
@@ -29,6 +30,8 @@ class Dimred:
 			self.__meta = self.__get_meta_io().read()
 		
 		self.__read_dimreds()
+
+		self.__purge_invalid_dimreds()
 	
 	def write(self) -> None:
 		self.__get_meta_io().write(self.__meta)
@@ -116,6 +119,20 @@ class Dimred:
 
 		return True
 
+	def __purge_invalid_dimreds(self) -> None:
+				existing_dimreds_id = [x for x in self.__dimreds]
+				
+				for invalid_dimred_id in numpy.setdiff1d(self.__meta.get_dimred_ids(),
+																										existing_dimreds_id):
+						print("WARNING: Removing invalid dimred %s in metalist"
+										% invalid_dimred_id)
+						self.__meta.remove_dimred(invalid_dimred_id)
+				
+				default_dimred = self.__meta.default
+				if default_dimred and not default_dimred in existing_dimreds_id:
+						print("WARNING: Default dimred %s not found"
+										% default_dimred)
+						self.__meta.default = None
 
 	def __getitem__(self, item):
 		return self.__dimreds[item]
