@@ -22,9 +22,9 @@ class Dimred:
 		self.__meta: MetaDimred = MetaDimred()
 		self.__dimreds: Dict[str, SingleDimred] = {}
 		
-		self.__read()
+		self.read()
 
-	def __read(self) -> None:
+	def read(self) -> None:
 		
 		if self.__get_meta_io().exists():
 			self.__meta = self.__get_meta_io().read()

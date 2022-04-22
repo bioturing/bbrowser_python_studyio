@@ -80,3 +80,6 @@ class Study:
         self.dimred.write()
         
         return dimred_id
+
+    def remove_dimred(self, dimred_id: str):
+        return self.dimred.remove(dimred_id)
