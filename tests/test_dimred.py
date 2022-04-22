@@ -13,6 +13,8 @@ from walnut.readers import TextReader
 def test_dimred_model():
   dimred = SingleDimred(**DIMRED)
   dimred2 = SingleDimred(**DIMRED_MULTISLIDE)
+  assert not dimred.is_multislide
+  assert dimred2.is_multislide
 
 
 def test_existing_dimred():
@@ -139,7 +141,7 @@ DIMRED = {'id': 'a49318ce18434574ab922ddfad19f708',
  'coords': [[-2, -4], [12, -22], [-12, 37]]
  }
 
-DIMRED_MULTISLIDE = {'id': 'a49318ce18434574ab922ddfad19f708',
+DIMRED_MULTISLIDE = {'id': 'multislide',
  'name': 't-SNE',
  'size': [3, 2],
  'param': {'omics': 'RNA',

@@ -30,7 +30,10 @@ class SingleDimred(SingleDimredBase):
 		if slide is None:
 			del values['slide']
 		return values
-
+	
+	@property
+	def is_multislide(self):
+		return getattr(self, 'slide', False)
 
 class MetaDimred(BaseModel):
 	data: Dict[str, SingleDimredBase] = {}

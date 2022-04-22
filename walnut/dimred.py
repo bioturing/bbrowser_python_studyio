@@ -46,7 +46,12 @@ class Dimred:
 		for dimred_id in self.__meta.get_dimred_ids():
 			try:
 				dimred_io = self.__get_single_dimred_io(dimred_id)
-				self.__dimreds[dimred_id] = dimred_io.read()
+				single_dimred = dimred_io.read()
+
+				# Skip multislide dimred
+				if not single_dimred.is_multislide:
+					self.__dimreds[dimred_id] = single_dimred
+					
 
 			except pydantic.ValidationError as e:
 				print("WARNING: Unable to parse category %s due to error: %s"
@@ -85,7 +90,8 @@ class Dimred:
 		return [x.size for x in self.__dimreds.values()]
 
 	@validate_arguments
-	def add(self, single_dimred: SingleDimred):
+	def add(self, new_dimred: SingleDimred):
+		single_dimred = new_dimred.copy()
 		
 		if single_dimred.id:
 			dimred_id = single_dimred.id 
@@ -120,13 +126,15 @@ class Dimred:
 		return True
 
 	def __purge_invalid_dimreds(self) -> None:
+				
 				existing_dimreds_id = [x for x in self.__dimreds]
 				
-				for invalid_dimred_id in numpy.setdiff1d(self.__meta.get_dimred_ids(),
-																										existing_dimreds_id):
-						print("WARNING: Removing invalid dimred %s in metalist"
-										% invalid_dimred_id)
-						self.__meta.remove_dimred(invalid_dimred_id)
+				# This will also delete multislide dimred, skipped for now
+				# for invalid_dimred_id in numpy.setdiff1d(self.__meta.get_dimred_ids(),
+				# 																						existing_dimreds_id):
+				# 		print("WARNING: Removing invalid dimred %s in metalist"
+				# 						% invalid_dimred_id)
+				# 		self.__meta.remove_dimred(invalid_dimred_id)
 				
 				default_dimred = self.__meta.default
 				if default_dimred and not default_dimred in existing_dimreds_id:
