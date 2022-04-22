@@ -9,7 +9,7 @@ class SingleDimredBase(BaseModel):
 	name: str
 	size: List[int]
 	history: List[History] = [common.create_history()]
-	param: dict
+	param: Optional[dict]
 
 class SingleDimred(SingleDimredBase):
 	coords: Optional[List[List[int]]]

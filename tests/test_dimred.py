@@ -10,6 +10,26 @@ from walnut.readers import TextReader
 
 # %%
 
+def test_add_dimred():
+  from walnut.study import Study
+  import pandas as pd
+  import numpy as np
+
+  study_folder = tempfile.mkdtemp()
+  study = Study(study_folder)
+  print(study.dimred)
+  coords = [[-2, -4], [12, -22], [-12, 37]]
+  name ='new dimred'
+  print(study.add_dimred(pd.DataFrame(coords), name))
+  print(study.add_dimred(np.array(coords), name))
+  print(study.add_dimred(np.array(coords), name, id='user_created_id'))
+  print(study.add_dimred(np.array(coords), name, id='user_created_id'))
+  try:
+    study.add_dimred(coords, name)
+  except ValueError as e:
+    print('Could not add unformatted coords')
+  print(study.dimred)
+
 def test_dimred_model():
   dimred = SingleDimred(**DIMRED)
   dimred2 = SingleDimred(**DIMRED_MULTISLIDE)
