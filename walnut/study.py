@@ -77,5 +77,6 @@ class Study:
                                      'coords': coords_list,
                                      'size': size
                                     })
+        self.dimred.write()
         
         return dimred_id
