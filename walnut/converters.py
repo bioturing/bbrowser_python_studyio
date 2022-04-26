@@ -2,7 +2,7 @@ from typing import TypeVar, Generic, Any
 from abc import ABC, abstractmethod
 import json
 
-from walnut.models import Category, Metalist, GeneCollections, RunInfo, CategoryMeta
+from walnut.models import Category, Metalist, GeneCollections, RunInfo, CategoryMeta, MetaDimred, SingleDimred
 from walnut import common
 
 OUT_TYPE = TypeVar("OUT_TYPE")
@@ -97,3 +97,22 @@ class IORunInfo(IOConverter[RunInfo]):
     @staticmethod
     def to_str(content: RunInfo) -> str:
         return content.json()
+
+class IOMetaDimred(IOConverter[MetaDimred]):
+    @staticmethod
+    def from_str(s: str) -> MetaDimred:
+        return MetaDimred.parse_obj(json.loads(s))
+    
+    @staticmethod
+    def to_str(content: MetaDimred) -> str:
+        return content.json()
+
+class IOSingleDimred(IOConverter[SingleDimred]):
+    @staticmethod
+    def from_str(s: str) -> SingleDimred:
+        return SingleDimred.parse_obj(json.loads(s))
+    
+    @staticmethod
+    def to_str(content: SingleDimred) -> str:
+        return content.json()
+

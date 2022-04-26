@@ -1,5 +1,5 @@
 import os
-from typing import List
+from typing import List, Optional
 from walnut.readers import Reader
 from walnut.metadata import Metadata
 from walnut.dimred import Dimred
@@ -8,6 +8,9 @@ from walnut.expression import Expression
 from walnut.run_info import RunInfo
 from walnut.readers import TextReader
 from walnut.gene_db import StudyGeneDB
+from walnut.common import create_uuid
+import numpy as np
+import pandas as pd
 
 class StudyStructure:
     def __init__(self, study_folder):
@@ -26,10 +29,10 @@ class StudyStructure:
 class Study:
     def __init__(self, study_folder, reader: Reader = TextReader()):
         self.__location = StudyStructure(study_folder)
-        #self.metadata = Metadata(self.__location.metadata, self.__TextFile)
+        # self.metadata = Metadata(self.__location.metadata, reader)
         self.expression = Expression(self.__location.h5matrix)
         self.run_info = RunInfo(self.__location.run_info, reader)
-        # self.dimred = Dimred(self.__location.dimred, self.__TextFile)
+        self.dimred = Dimred(self.__location.dimred, reader)
         self.gene_db = StudyGeneDB(self.__location.gene_db, self.run_info.get_species())
         self.gallery = Gallery(self.__location.main_dir, TextReader()) # Gallery is not encrypted
 
@@ -55,3 +58,28 @@ class Study:
             self.gallery.add_item(col_id, gene, [gene])
         self.gallery.write()
         return col_id
+
+    def add_dimred(self, coords: np.ndarray, name: str, id: Optional[str]=None) -> str:
+        """Add new dimred and return id of successfully added dimred"""
+        if id is None:
+          id = create_uuid()
+        if isinstance(coords, np.ndarray):
+          coords_list = coords.tolist()
+        elif isinstance(coords, pd.DataFrame):
+          coords_list = coords.to_numpy().tolist()
+        else:
+          raise ValueError('coords must be of type pandas.DataFrame or numpy.ndarray')
+        
+        size = list(coords.shape)
+
+        dimred_id = self.dimred.add({'name': name,
+                                     'id': id,
+                                     'coords': coords_list,
+                                     'size': size
+                                    })
+        self.dimred.write()
+        
+        return dimred_id
+
+    def remove_dimred(self, dimred_id: str):
+        return self.dimred.remove(dimred_id)

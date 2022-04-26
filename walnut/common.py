@@ -89,3 +89,6 @@ def is_number(x) -> bool:
 
 def get_pkg_data():
     return os.path.join(os.path.dirname(constants.__file__), "data")
+    
+def exc_to_str(e):
+    return "%s: %s" % (e.__class__.__name__, str(e))
