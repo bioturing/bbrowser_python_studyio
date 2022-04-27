@@ -16,6 +16,7 @@ classifiers = [
 include = [ "*.db" ]
 
 [tool.poetry.dependencies]
+python = ">=3.9.0"
 pydantic = "1.9.0"
 numpy = ">=1.20.0"
 pycryptodome = "3.14.1"
