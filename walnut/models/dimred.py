@@ -12,7 +12,7 @@ class SingleDimredBase(BaseModel):
 	param: Optional[dict]
 
 class SingleDimred(SingleDimredBase):
-	coords: Optional[List[List[int]]]
+	coords: Optional[List[List[float]]]
 	slide: Optional[List[str]]
 	
 	@root_validator(pre=True)

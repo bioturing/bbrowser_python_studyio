@@ -70,7 +70,7 @@ def test_existing_dimred():
     'name': 'xyz',
     'param': {'omics': 'A very weird omics'},
     'size': [10,3],
-    'coords': [[1,2], [3,4], [5,6]]
+    'coords': [[1.5,2.1], [3.2,4.3], [5,6]]
   }
   SingleDimred(**new_dimred)
 
@@ -79,7 +79,7 @@ def test_existing_dimred():
     # 'name': 'xyz',
     'param': {'omics': 'A very weird omics'},
     'size': [10,3],
-    'coords': [[1,2], [3,4], [5,6]]
+    'coords': [[1.5,2.1], [3.2,4.3], [5,6]]
   }
   try:
     SingleDimred(**new_dimred_2)
@@ -102,7 +102,7 @@ def test_dimred_iterable():
     'name': 'xyz',
     'param': {'omics': 'A very weird omics'},
     'size': [10,3],
-    'coords': [[1,2], [3,4], [5,6]]
+    'coords': [[1.5,2.1], [3.2,4.3], [5,6]]
   }
   tmp_dir_2 = tempfile.mkdtemp()
   dimred2 = Dimred(tmp_dir_2, TextReader())
@@ -158,7 +158,7 @@ DIMRED = {'id': 'a49318ce18434574ab922ddfad19f708',
   'method': 'tsne',
   'correction': 'none',
   'seed': 2409},
- 'coords': [[-2, -4], [12, -22], [-12, 37]]
+ 'coords': [[1.5,2.1], [3.2,4.3], [5,6]]
  }
 
 DIMRED_MULTISLIDE = {'id': 'multislide',
