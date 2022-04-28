@@ -23,7 +23,6 @@ pycryptodome = "*"
 h5py = "*"
 fastapi = "*"
 requests = "*"
-certifi = "*"
 
 [tool.poetry.dev-dependencies]
 pytest = "*"
