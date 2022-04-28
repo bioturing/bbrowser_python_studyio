@@ -57,9 +57,11 @@ class IOMetalist(IOConverter[Metalist]):
             obj = {"content": obj}
 
         invalid_categories = []
-        for category_name in obj["content"]:
+        for category_name, category in obj["content"].items():
             try:
-                CategoryMeta.parse_obj(obj["content"][category_name])
+                if not "id" in category:
+                    category["id"] = category_name
+                CategoryMeta.parse_obj(category)
             except Exception as e:
                 print("WARNING: Unable to parse category %s due to error: %s"
                         % (category_name, str(e)))
