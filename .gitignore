@@ -4,6 +4,7 @@
 !.gitignore
 !LICENSE
 !pyproject.toml
+!pyproject_bbrowser.toml
 !README.md
 !tests
 !tests/**/*.py
