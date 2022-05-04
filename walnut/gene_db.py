@@ -65,13 +65,23 @@ class StudyGeneDB(GeneDB):
         self.__ref.read()
 
     def create(self, gene_id: List[str], gene_name: List[str]=None):
-        """Create gene DB for a study given a list of genes (usually from matrix.hdf5)"""
+        """Create gene DB for a study given a list of genes (usually from matrix.hdf5)
+        This will make sure gene_id are unique
+        If only gene name are available, convert to gene id based on current reference.
+        Following conversion, if duplicates are found in the resulting gene ids,
+        the corresponding original gene names will be kept"""
+
+        if not len(set(gene_id)) == len(gene_id):
+            raise ValueError("Please make sure `gene_id` contains no duplicates")
+
         if not gene_name:
             if self.__ref.is_id(gene_id):
                 gene_name = self.__ref.convert(gene_id, _from="gene_id", _to="name")
             else:
                 gene_name = gene_id
                 gene_id = self.__ref.convert(gene_id)
+                gene_id = self.check_duplicate(gene_id, gene_name)
+
 
         df = pd.DataFrame({"gene_id": gene_id, "name": gene_name, "primary": 1})
         self.from_df(df)
@@ -88,3 +98,54 @@ class StudyGeneDB(GeneDB):
             return super().is_id(ids)
         else:
             return self.__ref.is_id(ids)
+    
+    @staticmethod
+    def check_duplicate(gene_ids: List[str], gene_names: List[str]):
+        """
+        Given two equal-length lists, check if item in `ids` contain duplicates.
+        If yes, replaced with corresponding item in `names`.
+        """
+        
+        if len(set(gene_ids)) == len(gene_ids):
+            return gene_ids
+        
+        if len(set(gene_names)) != len(gene_names):
+            raise ValueError("`names` must contain no duplicates")
+        gene_ids = pd.Series(gene_ids)
+        gene_names = pd.Series(gene_names)
+        dup_idx = gene_ids.duplicated()
+        duplicates = gene_ids[dup_idx]
+        
+        print("Reverting %s ID(s) to origin(s) due to duplicates:" % len(duplicates))
+        print("- ID:", duplicates)
+        print("- Origin:", gene_names[dup_idx])
+
+        for dup in duplicates:
+            idx = gene_ids == dup
+            gene_ids[idx] = gene_names[idx]
+
+        # Debug only
+        if sum(gene_ids.duplicated()) > 0:
+            raise ValueError("Something went wrong while trying to ensuring uniqueness of gene ids")
+        #
+
+        return gene_ids.values.tolist()
+            
+
+    def make_unique(items: List[str]):
+        if len(set(items)) == len(items):
+            return items
+    
+        items = pd.Series(items)
+        duplicates = items[items.duplicated()]
+        
+        print('Found %s duplicates' % len(duplicates))
+
+        for dup in duplicates:
+            dup_idx = items[items == dup].index
+
+            for i, j in enumerate(dup_idx[1:]):
+                items[j] = items[j] + '.' + str(i+1)
+
+        assert sum(items.duplicated()) == 0
+        return items.values.tolist()
