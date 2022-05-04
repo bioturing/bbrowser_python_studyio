@@ -65,11 +65,18 @@ class StudyGeneDB(GeneDB):
         self.__ref.read()
 
     def create(self, gene_id: List[str], gene_name: List[str]=None):
-        """Create gene DB for a study given a list of genes (usually from matrix.hdf5)
+        """
+        Create gene DB for a study given a list of genes (usually from matrix.hdf5)
         This will make sure gene_id are unique
         If only gene name are available, convert to gene id based on current reference.
         Following conversion, if duplicates are found in the resulting gene ids,
-        the corresponding original gene names will be kept"""
+        the corresponding original gene names will be kept
+        Argument:
+        - gene_id: list of gene id, no duplicates allowed
+        - gene_name: List of corresponding gene name.
+        If both are provided, gene_db will be written as is.
+        If only one list is available, always pass to `gene_id` argument
+        """
 
         if not len(set(gene_id)) == len(gene_id):
             raise ValueError("Please make sure `gene_id` contains no duplicates")
@@ -124,10 +131,8 @@ class StudyGeneDB(GeneDB):
             idx = gene_ids == dup
             gene_ids[idx] = gene_names[idx]
 
-        # Debug only
         if sum(gene_ids.duplicated()) > 0:
             raise ValueError("Something went wrong while trying to ensuring uniqueness of gene ids")
-        #
 
         return gene_ids.values.tolist()
             
