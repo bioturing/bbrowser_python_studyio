@@ -1,7 +1,7 @@
 import os
 import pandas as pd
 from walnut import common
-from typing import Dict, List, Optional
+from typing import List, Optional
 import numpy as np
 from walnut.converters import IOAsIs
 from walnut.FileIO import FileIO
@@ -9,6 +9,7 @@ from walnut.readers import SQLReader
 
 class GeneDB:
     def __init__(self, gene_db_dir, species):
+        print('---', gene_db_dir)
         self.__file = FileIO[pd.DataFrame](os.path.join(gene_db_dir, '%s.db' % species), SQLReader(), IOAsIs)
         self.__df = pd.DataFrame(columns=["gene_id", "name", "primary"])
     
@@ -61,7 +62,7 @@ class GeneDB:
 class StudyGeneDB(GeneDB):
     def __init__(self, gene_db_dir, species):
         super().__init__(gene_db_dir, species)
-        self.__ref = GeneDB(common.get_pkg_data(), species)
+        self.__ref = GeneDB(os.path.join(common.get_pkg_data(), 'db'), species)
         self.__ref.read()
 
     def create(self, gene_id: List[str], gene_name: Optional[List[str]]=None):

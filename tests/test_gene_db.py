@@ -1,10 +1,11 @@
 import tempfile
+import os
 from walnut.gene_db import GeneDB
 from walnut.study import Study
 from walnut import common
 
 def test_gene_db_conversion():
-    gene_db = GeneDB(common.get_pkg_data(), "human")
+    gene_db = GeneDB(os.path.join(common.get_pkg_data(), 'db'), "human")
     gene_db.read()
     ids = gene_db.convert(["CD3D", "CD79A"])
     assert ids == ["ENSG00000167286", "ENSG00000105369"]
@@ -19,9 +20,9 @@ def test_gene_db_creation():
     study.gene_db.read()
     df = study.gene_db.to_df()
     assert df.index.size == 5
-    db = GeneDB(common.get_pkg_data(), study.run_info.get_species())
+    db = GeneDB(os.path.join(common.get_pkg_data(), 'db'), study.run_info.get_species())
     db.read()
-    assert db.is_id(df["gene_id"])
+    assert db.is_id(df["gene_id"].tolist())
 
 
 def test_gene_db_creation_with_dup():
@@ -34,13 +35,13 @@ def test_gene_db_creation_with_dup():
 
     study_folder = tempfile.mkdtemp()
     study = Study(study_folder)
-    study.gene_db.create(features)
+    study.gene_db.create(features.tolist())
     study.gene_db.read()
     df = study.gene_db.to_df()
     assert sum(df['gene_id'].duplicated()) == 0
     assert df.index.size == len(features)
     db = GeneDB(common.get_pkg_data(), study.run_info.get_species())
     db.read()
-    assert db.is_id(df["gene_id"])
+    assert db.is_id(df["gene_id"].tolist())
 
 

@@ -1,7 +1,7 @@
 from walnut.converters import IORunInfo
 from walnut.readers import Reader
 from walnut.FileIO import FileIO
-from walnut import models
+from walnut import constants, models
 import os
 
 class RunInfo():
@@ -22,6 +22,9 @@ class RunInfo():
 
         self.__content = self.__file.read()
     
+    def get_species(self) -> constants.SPECIES_LIST:
+        return self.__content.species
+
     def get_content(self) -> models.RunInfo:
         return self.__content.copy()
 
