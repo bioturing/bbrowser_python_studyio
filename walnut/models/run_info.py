@@ -61,8 +61,8 @@ class RunInfo(BaseModel):
     history: List[common.History] = [common.create_history()]
     is_public: bool = True
     ana_setting: AnaSetting = AnaSetting()
-    n_batch: Optional[int]
-    version: Optional[int]
+    n_batch: Optional[int] = 1
+    version: Optional[int] = 16
 
     @validator("version", always=True)
     def set_version(cls, _):
@@ -73,9 +73,9 @@ class RunInfo(BaseModel):
         return len(values["ana_setting"].inputType)
     
     @validator("unit_settings", pre=True)
-    def set_unit_settings(cls, value: dict):
+    def set_unit_settings(cls, value):
         settings = {}
-        for omic in constants.OMICS_LIST.__args__:
+        for omic in constants.OMICS_LIST.__args__:  # type: ignore
             settings[omic] = OmicUnitSettings.parse_obj(
                 value.get(omic, {"type": "raw" if omic == "PRTB" else "norm", "transform": "none"})
             )
