@@ -15,7 +15,8 @@ UNIT_LIST = Literal["umi", "lognorm", "read", "cpm", "tpm", "rpkm", "fpkm",
                     "unknown"]
 INPUT_FORMAT_LIST = Literal["fullmatrix", "mtx", "h5matrix",
                             "crisprfullmatrix", "visium", "h5visium", "bcs",
-                            "seurat", "scanpy", "loomamgen", "fastq"] # No UPPER CASE allowed for backward compatibility purpose
+                            "seurat", "scanpy", "loomamgen", "fastq",
+                            "csv", "txt", "tsv", "nanostring"] # No UPPER CASE allowed for backward compatibility purpose
 NORMALIZATION_LIST = Literal["none", "lognorm"]
 
 METADATA_TYPE_LIST = Literal["category", "numeric"]

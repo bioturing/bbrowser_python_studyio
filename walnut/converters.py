@@ -94,6 +94,16 @@ class IORunInfo(IOConverter[RunInfo]):
         content["n_cell"] = content.get("n_cell", "n_samples")
         content["omics"] = content.get("dataType", "omics", default=["RNA"])
         content["title"] = content.get("title", "name", default="Untitled study")
+        
+        info = content["ana_setting"]["filter"]["gene"]
+        
+        if not isinstance(info, list) or len(info) < 2:
+          content["ana_setting"]["filter"]["gene"] = [0, 0]  # Fix info = [0]
+        else:
+          for i, item in enumerate(info):
+            if isinstance(item, list):
+              info[i] = int(item[0]) # Fix info = [[200], [0]] --> [200, 0]
+
         return RunInfo.parse_obj(content)
 
     @staticmethod
