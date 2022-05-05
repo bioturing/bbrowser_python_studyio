@@ -22,6 +22,10 @@ class AnaSetting(BaseModel):
     normMethod: constants.NORMALIZATION_LIST = "lognorm"
     filter: FilterSetting = FilterSetting()
 
+    @validator("inputType", pre=True, each_item=True)
+    def check_input_type(cls, v):
+      return v.lower() # backward compatibility
+
 class RunInfo(BaseModel):
     hash_id: str
     title: str
