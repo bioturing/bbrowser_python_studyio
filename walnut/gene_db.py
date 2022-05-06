@@ -88,6 +88,8 @@ class StudyGeneDB(GeneDB):
                 gene_name = gene_id
                 gene_id = self.__ref.convert(gene_id)
                 gene_id = self.check_duplicate(gene_id, gene_name)
+        else:
+            assert len(gene_id) == len(gene_name)
 
 
         df = pd.DataFrame({"gene_id": gene_id, "name": gene_name, "primary": 1})
