@@ -17,10 +17,31 @@ class FilterSetting(BaseModel):
     mito: int = 100
     top: int = 2000
 
+    @validator("gene", pre=True)
+    def fix_weird_gene_values(cls, v, values):
+      if not isinstance(v, list) or len(v) < 2:
+        print("WARNING: Invalid FilterSetting found", v)
+        return (0,0) # Fix gene = [0]
+      
+      for i, item in enumerate(v):
+        if isinstance(item, list):
+          print("WARNING: Invalid FilterSetting found", v)
+          v[i] = int(item[0]) # Fix gene = [[200], [0]] --> [200, 0]
+      return v
+
+
 class AnaSetting(BaseModel):
     inputType: List[constants.INPUT_FORMAT_LIST] = ["mtx"]
     normMethod: constants.NORMALIZATION_LIST = "lognorm"
     filter: FilterSetting = FilterSetting()
+
+    @validator("inputType", pre=True)
+    def check_input_type(cls, v):
+      if not isinstance(v, list):
+        v = [v] # Fix "bcs" -> ["bcs"]
+      for i, item in enumerate(v):
+        v[i] = v[i].lower() # backward compatibility
+      return v
 
 class RunInfo(BaseModel):
     hash_id: str
