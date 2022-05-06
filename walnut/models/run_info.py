@@ -64,6 +64,13 @@ class RunInfo(BaseModel):
     n_batch: Optional[int] = 1
     version: Optional[int] = 16
 
+    @validator("omics", pre=True)
+    def check_omics(cls, value):
+        for (i, omic) in enumerate(value):
+            if omic == 'nanostring':
+                value[i] = 'spatial'
+        return value
+
     @validator("version", always=True)
     def set_version(cls, _):
         return 16
