@@ -1,7 +1,7 @@
 import os
 import pandas as pd
 from walnut import common
-from typing import List
+from typing import Dict, List
 import numpy as np
 from walnut.converters import IOAsIs
 from walnut.FileIO import FileIO
@@ -87,7 +87,7 @@ class StudyGeneDB(GeneDB):
             else:
                 gene_name = gene_id
                 gene_id = self.__ref.convert(gene_id)
-                gene_id = self.check_duplicate(gene_id, gene_name)
+                gene_id = self.__ensure_unique(gene_id, gene_name)
         else:
             assert len(gene_id) == len(gene_name)
 
@@ -108,51 +108,33 @@ class StudyGeneDB(GeneDB):
         else:
             return self.__ref.is_id(ids)
     
-    @staticmethod
-    def check_duplicate(gene_ids: List[str], gene_names: List[str]):
+    def __make_unique(self, x: List[str]) -> List[str]:
+        """ Create a unique list of strings """
+        memo: Dict[str, int] = {}
+        for i, val in enumerate(x):
+            count = memo.get(val, 0)
+            if count > 0:
+                count += 1
+                memo[val] = count
+                x[i] = '%s_%s' % (val, count)
+            else:
+                memo[val] = 1
+        return x
+
+    def __ensure_unique(self, gene_ids: List[str], gene_names: List[str]) -> List[str]:
         """
         Given two equal-length lists, check if item in `ids` contain duplicates.
         If yes, replaced with corresponding item in `names`.
         """
+        assert len(gene_ids) == len(gene_names)
+
+        memo = set()
+        new_ids: List[str] = []
+        for i, gid in enumerate(gene_ids):
+            if gid in memo:
+                new_ids.append(gene_names[i])
+            else:
+                new_ids.append(gid)
+                memo.add(gid)
         
-        if len(set(gene_ids)) == len(gene_ids):
-            return gene_ids
-        
-        if len(set(gene_names)) != len(gene_names):
-            raise ValueError("`names` must contain no duplicates")
-        gene_ids = pd.Series(gene_ids)
-        gene_names = pd.Series(gene_names)
-        dup_idx = gene_ids.duplicated()
-        duplicates = gene_ids[dup_idx]
-        
-        print("Reverting %s ID(s) to origin(s) due to duplicates:" % len(duplicates))
-        print("- ID:", duplicates)
-        print("- Origin:", gene_names[dup_idx])
-
-        for dup in duplicates:
-            idx = gene_ids == dup
-            gene_ids[idx] = gene_names[idx]
-
-        if sum(gene_ids.duplicated()) > 0:
-            raise ValueError("Something went wrong while trying to ensuring uniqueness of gene ids")
-
-        return gene_ids.values.tolist()
-            
-
-    def make_unique(items: List[str]):
-        if len(set(items)) == len(items):
-            return items
-    
-        items = pd.Series(items)
-        duplicates = items[items.duplicated()]
-        
-        print('Found %s duplicates' % len(duplicates))
-
-        for dup in duplicates:
-            dup_idx = items[items == dup].index
-
-            for i, j in enumerate(dup_idx[1:]):
-                items[j] = items[j] + '.' + str(i+1)
-
-        assert sum(items.duplicated()) == 0
-        return items.values.tolist()
+        return self.__make_unique(new_ids)
