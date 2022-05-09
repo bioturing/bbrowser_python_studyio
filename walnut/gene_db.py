@@ -1,7 +1,7 @@
 import os
 import pandas as pd
 from walnut import common
-from typing import Dict, List
+from typing import Dict, List, Optional
 import numpy as np
 from walnut.converters import IOAsIs
 from walnut.FileIO import FileIO
@@ -64,7 +64,7 @@ class StudyGeneDB(GeneDB):
         self.__ref = GeneDB(common.get_pkg_data(), species)
         self.__ref.read()
 
-    def create(self, gene_id: List[str], gene_name: List[str]=None):
+    def create(self, gene_id: List[str], gene_name: Optional[List[str]]=None):
         """
         Create gene DB for a study given a list of genes (usually from matrix.hdf5)
         This will make sure gene_id are unique
@@ -123,8 +123,12 @@ class StudyGeneDB(GeneDB):
 
     def __ensure_unique(self, gene_ids: List[str], gene_names: List[str]) -> List[str]:
         """
-        Given two equal-length lists, check if item in `ids` contain duplicates.
-        If yes, replaced with corresponding item in `names`.
+        Duplicates in gene_ids will be replaced with gene_names. The final array is then
+        forced into a list of unique labels.
+
+        Args:
+            gene_ids: a list of gene ids
+            gene_names: a list of gene names
         """
         assert len(gene_ids) == len(gene_names)
 
