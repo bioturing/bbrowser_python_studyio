@@ -14,7 +14,7 @@ class TestSpatial(unittest.TestCase):
         self.spatial_info = Spatial(self.__spatial_folder)
         self.lens_info = LensInfo(self.__spatial_folder)
 
-        self.lens_info.add(ImageInfo(
+        self.lens_info.add(
             id = 1,
             name= "lens_1",
             width= 600,
@@ -23,7 +23,7 @@ class TestSpatial(unittest.TestCase):
             raster_names= ["channel1", "channel2", "channel3"],
             raster_types= ["multiplex", "multiplex", "multiplex"],
             lensMode= "PRIVATE",
-        ))
+        )
 
     def test_update_spatial(self):
         self.spatial_info.update(width=1000, height=1000, diameter=[10, 10, 10], diameter_micron=[1, 1, 1])
@@ -63,7 +63,7 @@ class TestSpatial(unittest.TestCase):
         assert self.spatial_info.write() == True
 
     def test_add_lens(self):
-        info = ImageInfo(
+        self.lens_info.add(
             id= 2,
             name= "lens_2",
             width= 1000,
@@ -71,14 +71,7 @@ class TestSpatial(unittest.TestCase):
             raster_id= [4, 5, 6],
             raster_names= ["channel4", "channel5", "channel6"],
             raster_types= ["truecolor"],
-            lensMode= "PUBLIC",
-        )
-
-        self.lens_info.add(info)
-
-        print(self.lens_info.getAll())
-
-        self.lens_info.write()
+            lensMode= "PUBLIC",)
 
         image_info = self.lens_info.get(2)
 
@@ -95,18 +88,14 @@ class TestSpatial(unittest.TestCase):
         assert image_info.lensMode == "PUBLIC"
 
     def test_add_existing_lens(self):
-        info = ImageInfo(
-            id= 1,
+        self.lens_info.add(id= 1,
             name= "lens_1",
             width= 1000,
             height= 1000,
             raster_id= [7, 8, 9],
             raster_names= ["channel7", "channel8", "channel9"],
             raster_types= ["truecolor"],
-            lensMode= "PUBLIC",
-        )
-
-        self.lens_info.add(info)
+            lensMode= "PUBLIC")
 
     def test_add_index_lens(self):
         assert self.lens_info.get_index(1) == 0

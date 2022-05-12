@@ -1,4 +1,5 @@
 import os
+from walnut import constants
 from walnut.converters import IOSpatial, IOLens
 from walnut.FileIO import FileIO
 from walnut.readers import Reader, TextReader
@@ -35,14 +36,37 @@ class LensInfo:
         
         return False
 
-    def add(self, image_info: ImageInfo):
-        if self.get(image_info.id):
-            raise Exception("%s already exists" % image_info.id)
+    def add(self, 
+        id: constants.LENID, 
+        name: str, 
+        width: float, 
+        height: float, 
+        raster_id: List[constants.LENID],
+        raster_names: List[str],
+        raster_types: List[constants.LENS_IMAGE_TYPE],
+        lensMode: constants.LENS_MODE
+    ):
+        if self.get(id):
+            raise Exception("%s already exists" % id)
 
-        raster_type = image_info.raster_types
+        # if truecolor, length of raster_types is 1
+        # if multiplex, length of raster_types is 3
+        raster_length = len(raster_types)
 
-        if (raster_type == 'truecolor' and len(raster_type) != 1) or (raster_type == 'multiplex' and len(raster_type) != 3):
-            raise Exception("%s does not match with length" % raster_type)
+        if 'multiplex' in raster_types and not (raster_types.count('multiplex') == raster_length and len(raster_types) == 3):
+                    raise Exception("raster_types of multiplex requires 3 in length")
+
+        if 'truecolor' in raster_types and not (raster_types.count('truecolor') == raster_length and raster_length == 1):
+            raise Exception("raster_types of truecolor requires 1 in length")
+
+        image_info = ImageInfo(id = id, 
+                                name = name, 
+                                width = width, 
+                                height = height, 
+                                raster_id = raster_id,
+                                raster_names = raster_names,
+                                raster_types = raster_types,
+                                lensMode = lensMode)
 
         self.lens_image_info.__root__.append(image_info)
 
