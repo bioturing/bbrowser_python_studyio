@@ -92,3 +92,16 @@ def get_pkg_data():
     
 def exc_to_str(e):
     return "%s: %s" % (e.__class__.__name__, str(e))
+
+def make_unique(x: List[str]) -> List[str]:
+    """ Create a unique list of strings """
+    memo: Dict[str, int] = {}
+    for i, val in enumerate(x):
+        count = memo.get(val, 0)
+        if count > 0:
+            count += 1
+            memo[val] = count
+            x[i] = '%s_%s' % (val, count)
+        else:
+            memo[val] = 1
+    return x 

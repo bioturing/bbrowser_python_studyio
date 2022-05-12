@@ -79,7 +79,8 @@ class StudyGeneDB(GeneDB):
         """
 
         if not len(set(gene_id)) == len(gene_id):
-            raise ValueError("Please make sure `gene_id` contains no duplicates")
+            print("WARNING: Duplicates found in `gene_id` while creating GeneDB")
+            gene_id = common.make_unique(gene_id)
 
         if not gene_name:
             if self.__ref.is_id(gene_id):
@@ -107,20 +108,8 @@ class StudyGeneDB(GeneDB):
             return super().is_id(ids)
         else:
             return self.__ref.is_id(ids)
-    
-    def __make_unique(self, x: List[str]) -> List[str]:
-        """ Create a unique list of strings """
-        memo: Dict[str, int] = {}
-        for i, val in enumerate(x):
-            count = memo.get(val, 0)
-            if count > 0:
-                count += 1
-                memo[val] = count
-                x[i] = '%s_%s' % (val, count)
-            else:
-                memo[val] = 1
-        return x
 
+    
     def __ensure_unique(self, gene_ids: List[str], gene_names: List[str]) -> List[str]:
         """
         Duplicates in gene_ids will be replaced with gene_names. The final array is then
@@ -141,4 +130,4 @@ class StudyGeneDB(GeneDB):
                 new_ids.append(gid)
                 memo.add(gid)
         
-        return self.__make_unique(new_ids)
+        return common.make_unique(new_ids)
