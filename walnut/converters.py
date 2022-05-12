@@ -2,7 +2,7 @@ from typing import TypeVar, Generic, Any
 from abc import ABC, abstractmethod
 import json
 
-from walnut.models import Category, Metalist, GeneCollections, RunInfo, CategoryMeta, MetaDimred, SingleDimred
+from walnut.models import Category, Metalist, GeneCollections, RunInfo, CategoryMeta, MetaDimred, SingleDimred, SpatialInfo, LensImageInfo
 from walnut import common
 
 OUT_TYPE = TypeVar("OUT_TYPE")
@@ -118,3 +118,20 @@ class IOSingleDimred(IOConverter[SingleDimred]):
     def to_str(content: SingleDimred) -> str:
         return content.json()
 
+class IOSpatial(IOConverter[SpatialInfo]):
+    @staticmethod
+    def from_str(s: str) -> SpatialInfo:
+        return SpatialInfo(__root__=json.loads(s))
+
+    @staticmethod
+    def to_str(content: SpatialInfo) -> str:
+        return content.json()
+
+class IOLens(IOConverter[LensImageInfo]):
+    @staticmethod
+    def from_str(s: str) -> LensImageInfo:
+        return LensImageInfo(__root__=json.loads(s))
+
+    @staticmethod
+    def to_str(content: LensImageInfo) -> str:
+        return content.json()
