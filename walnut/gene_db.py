@@ -79,8 +79,7 @@ class StudyGeneDB(GeneDB):
         """
 
         if not len(set(gene_id)) == len(gene_id):
-            print("WARNING: Duplicates found in `gene_id` while creating GeneDB")
-            gene_id = common.make_unique(gene_id)
+            raise ValueError("Please make sure `gene_id` contains no duplicates")
 
         if not gene_name:
             if self.__ref.is_id(gene_id):
