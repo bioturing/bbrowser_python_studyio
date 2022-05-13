@@ -15,7 +15,7 @@ class ImageInfo(BaseModel):
     name: str
     width: float
     height: float
-    raster_id: List[constants.LENSID]
+    raster_ids: List[constants.LENSID]
     raster_names: List[str]
     raster_types: List[constants.LENS_IMAGE_TYPE]
     lensMode: constants.LENS_MODE

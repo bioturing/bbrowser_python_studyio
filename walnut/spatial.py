@@ -20,9 +20,11 @@ class LensInfo:
 
     def read(self):
         if not self.exists():
-            raise Exception("No Lens info to read")
+            print("WARNING: No Lens info to read")
+            return False
 
         self.lens_image_info = self.__lens_image_info.read()
+        return True
     
     def write(self):
         self.__lens_image_info.write(self.lens_image_info)
@@ -41,29 +43,31 @@ class LensInfo:
         name: str, 
         width: float, 
         height: float, 
-        raster_id: List[constants.LENSID],
+        raster_ids: List[constants.LENSID],
         raster_names: List[str],
         raster_types: List[constants.LENS_IMAGE_TYPE],
         lensMode: constants.LENS_MODE
     ):
         if self.get(id):
-            raise Exception("%s already exists" % id)
+            print("WARNING: %s already exists" % id)
+            return False
+
+        raster_length = len(raster_types)
+        # if multiplex, length of raster_types is equal to length of multiplex
+        if 'multiplex' in raster_types and raster_types.count('multiplex') != raster_length:
+            print("WARNING: raster_types of multiplex requires 3 in length")
+            return False
 
         # if truecolor, length of raster_types is 1
-        # if multiplex, length of raster_types is 3
-        raster_length = len(raster_types)
-
-        if 'multiplex' in raster_types and not (raster_types.count('multiplex') == raster_length and len(raster_types) == 3):
-                    raise Exception("raster_types of multiplex requires 3 in length")
-
         if 'truecolor' in raster_types and not (raster_types.count('truecolor') == raster_length and raster_length == 1):
-            raise Exception("raster_types of truecolor requires 1 in length")
+            print("WARNING: raster_types of truecolor requires 1 in length")
+            return False
 
         image_info = ImageInfo(id = id, 
                                 name = name, 
                                 width = width, 
                                 height = height, 
-                                raster_id = raster_id,
+                                raster_ids = raster_ids,
                                 raster_names = raster_names,
                                 raster_types = raster_types,
                                 lensMode = lensMode)
@@ -82,7 +86,8 @@ class LensInfo:
             if str(image_info.id) == str(id):
                 return i
         
-        raise Exception("%s does not exist" % id)
+        print("WARNING: %s does not exist" % id)
+        return False
 
     def delete(self, id: LENSID):
         index = self.get_index(id)
@@ -112,9 +117,11 @@ class Spatial:
 
     def read(self):
         if not self.exists():
-            raise Exception("No spatial info to read")
+            print("WARNING: No spatial info to read")
+            return False
         
         self.spatial_info = self.__spatial_info.read()
+        return True
 
     def write(self):
         self.__spatial_info.write(self.spatial_info)
@@ -142,7 +149,8 @@ class Spatial:
 
     def update_width(self, width: float):
         if width == None:
-            raise Exception("Width cannot be None")
+            print("WARNING: Width cannot be None")
+            return False
 
         self.spatial_info.width = width
         self.write()
@@ -151,7 +159,8 @@ class Spatial:
 
     def update_height(self, height: float):
         if height == None:
-            raise Exception("Height cannot be None")
+            print("WARNING: Height cannot be None")
+            return False
 
         self.spatial_info.height = height
         self.write()
@@ -160,7 +169,8 @@ class Spatial:
 
     def update_diamter(self, diameter: List[float]):
         if diameter == None:
-            raise Exception("Diameter cannot be None")
+            print("WARNING: Diameter cannot be None")
+            return False
 
         self.spatial_info.diameter = diameter
         self.write()
@@ -169,7 +179,8 @@ class Spatial:
 
     def update_diameter_micron(self, diameter_micron: List[float]):
         if diameter_micron == None:
-            raise Exception("Diameter Micron cannot be None")
+            print("WARNING: Diameter Micron cannot be None")
+            return False
 
         self.spatial_info.diameter_micron = diameter_micron
         self.write()

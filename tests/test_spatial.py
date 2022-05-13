@@ -19,7 +19,7 @@ class TestSpatial(unittest.TestCase):
             name= "lens_1",
             width= 600,
             height= 600,
-            raster_id= [1, 2, 3],
+            raster_ids= [1, 2, 3],
             raster_names= ["channel1", "channel2", "channel3"],
             raster_types= ["multiplex", "multiplex", "multiplex"],
             lensMode= "PRIVATE",
@@ -68,7 +68,7 @@ class TestSpatial(unittest.TestCase):
             name= "lens_2",
             width= 1000,
             height= 1000,
-            raster_id= [4, 5, 6],
+            raster_ids= [4, 5, 6],
             raster_names= ["channel4", "channel5", "channel6"],
             raster_types= ["truecolor"],
             lensMode= "PUBLIC",)
@@ -82,7 +82,7 @@ class TestSpatial(unittest.TestCase):
         assert image_info.name == "lens_2"
         assert image_info.width == 1000
         assert image_info.height == 1000
-        assert image_info.raster_id == [4, 5, 6]
+        assert image_info.raster_ids == [4, 5, 6]
         assert image_info.raster_names == ["channel4", "channel5", "channel6"]
         assert image_info.raster_types == ["truecolor"] and len(image_info.raster_types) == 1
         assert image_info.lensMode == "PUBLIC"
@@ -92,7 +92,7 @@ class TestSpatial(unittest.TestCase):
             name= "lens_1",
             width= 1000,
             height= 1000,
-            raster_id= [7, 8, 9],
+            raster_ids= [7, 8, 9],
             raster_names= ["channel7", "channel8", "channel9"],
             raster_types= ["truecolor"],
             lensMode= "PUBLIC")
