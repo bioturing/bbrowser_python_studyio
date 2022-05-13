@@ -6,8 +6,8 @@ from walnut.readers import Reader, TextReader
 from walnut.models import SpatialInfo, ImageInfo, LensImageInfo
 from typing import List
 from walnut.constants import LENSID
+from walnut import common
 from pydantic import ValidationError
-
 
 class LensInfo:
     def __init__(self, spatial_folder: str, reader: Reader = TextReader()):
@@ -126,38 +126,41 @@ class Spatial:
         diameter_micron: List[float], 
         version: int = 1
     ):
-        self.spatial_info = SpatialInfo(
-            width=width,
-            height=height,
-            diameter=diameter,
-            diameter_micron=diameter_micron,
-            version=version
-        )
-
-        return True
+        try:
+            self.spatial_info = SpatialInfo(
+                width=width,
+                height=height,
+                diameter=diameter,
+                diameter_micron=diameter_micron,
+                version=version
+            )
+            return True
+        except ValidationError as e:
+            print(common.exc_to_str(e))
+            return False
 
     def update_width(self, width: float):
         try:
             self.spatial_info.width = width
             return True
-        except:
-            print("WARNING: Width cannot be %s" % type(width))
+        except ValidationError as e:
+            print(common.exc_to_str(e))
             return False
 
     def update_height(self, height: float):
         try:
             self.spatial_info.height = height
             return True
-        except:
-            print("WARNING: Height cannot be %s" % type(height))
+        except ValidationError as e:
+            print(common.exc_to_str(e))
             return False
 
-    def update_diamter(self, diameter: List[float]):
+    def update_diameter(self, diameter: List[float]):
         try:
             self.spatial_info.diameter = diameter
             return True
-        except:
-            print("WARNING: Diameter cannot be %s" % type(diameter))
+        except ValidationError as e:
+            print(common.exc_to_str(e))
             return False
 
 
@@ -165,8 +168,8 @@ class Spatial:
         try:
             self.spatial_info.diameter_micron = diameter_micron
             return True
-        except:
-            print("WARNING: Diameter Micron cannot be %s" % type(diameter_micron))
+        except ValidationError as e:
+            print(common.exc_to_str(e))
             return False
 
 

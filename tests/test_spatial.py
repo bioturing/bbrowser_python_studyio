@@ -1,6 +1,8 @@
 import unittest
 import tempfile
 
+from pydantic import ValidationError
+
 class TestSpatial(unittest.TestCase):
     def __init__(self, methodName="runTest"):
         unittest.TestCase.__init__(self, methodName=methodName)
@@ -22,8 +24,8 @@ class TestSpatial(unittest.TestCase):
         ) == True
 
     def test_update_spatial(self):
-        self.spatial_info.update(width=1000, height=1000, diameter=[10, 10, 10], diameter_micron=[1, 1, 1])
-
+        assert self.spatial_info.update(width=1000, height=1000, diameter=[10, 10, 10], diameter_micron=[1, 1, 1])
+        assert not self.spatial_info.update(width="abc", height=1000, diameter=[10, 10, 10], diameter_micron=[1, 1, 1])
         info = self.spatial_info.get()
 
         assert info.width == 1000
@@ -32,29 +34,32 @@ class TestSpatial(unittest.TestCase):
         assert info.diameter_micron == [1, 1, 1]
 
     def test_update_width(self):
-        self.spatial_info.update_width(2000)
-
+        assert self.spatial_info.update_width(2000)
+        assert not self.spatial_info.update_width("abc")
         info = self.spatial_info.get()
         assert info.width == 2000
 
     def test_update_height(self):
-        self.spatial_info.update_height(3000)
-
+        assert self.spatial_info.update_height(3000)
+        assert not self.spatial_info.update_height("abc")
         info = self.spatial_info.get()
         assert info.height == 3000
 
     def test_update_diameter(self):
-        self.spatial_info.update_diamter([20, 20, 20, 20])
-
+        assert self.spatial_info.update_diameter([20, 20, 20, 20])
+        assert not self.spatial_info.update_diameter([20, 20, 20, 20, "abc"])
         info = self.spatial_info.get()
         assert info.diameter == [20, 20, 20, 20]
 
     def test_update_diameter_micron(self):
-        self.spatial_info.update_diameter_micron([2, 2, 2, 2])
-
+        assert self.spatial_info.update_diameter_micron([2, 2, 2, 2])
+        assert not self.spatial_info.update_diameter_micron([2, 2, "abc", 2, 2])
+        
         info = self.spatial_info.get()
         assert info.diameter_micron == [2, 2, 2, 2]
-
+        assert self.spatial_info.update_diameter_micron([1, 1, 1, 1])
+        assert info.diameter_micron == [1, 1, 1, 1]
+    
     def test_write_spatial(self):
         assert self.spatial_info.write() == True
 
