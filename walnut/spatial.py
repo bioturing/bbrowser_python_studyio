@@ -5,7 +5,7 @@ from walnut.FileIO import FileIO
 from walnut.readers import Reader, TextReader
 from walnut.models import SpatialInfo, ImageInfo, LensImageInfo
 from typing import List
-from walnut.constants import LENID
+from walnut.constants import LENSID
 
 
 class LensInfo:
@@ -29,7 +29,7 @@ class LensInfo:
 
         return True
 
-    def get(self, id: LENID) -> ImageInfo:
+    def get(self, id: LENSID) -> ImageInfo:
         for image_info in self.lens_image_info.__root__:
             if str(image_info.id) == str(id):
                 return image_info
@@ -37,11 +37,11 @@ class LensInfo:
         return False
 
     def add(self, 
-        id: constants.LENID, 
+        id: constants.LENSID, 
         name: str, 
         width: float, 
         height: float, 
-        raster_id: List[constants.LENID],
+        raster_id: List[constants.LENSID],
         raster_names: List[str],
         raster_types: List[constants.LENS_IMAGE_TYPE],
         lensMode: constants.LENS_MODE
@@ -77,14 +77,14 @@ class LensInfo:
     def getAll(self) -> List[ImageInfo]:
         return self.lens_image_info.__root__
 
-    def get_index(self, id: LENID) -> int:
+    def get_index(self, id: LENSID) -> int:
         for i, image_info in enumerate(self.lens_image_info.__root__):
             if str(image_info.id) == str(id):
                 return i
         
         raise Exception("%s does not exist" % id)
 
-    def delete(self, id: LENID):
+    def delete(self, id: LENSID):
         index = self.get_index(id)
         del self.lens_image_info.__root__[index]
 

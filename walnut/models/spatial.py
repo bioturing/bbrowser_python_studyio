@@ -11,11 +11,11 @@ class SpatialInfo(BaseModel):
     version: int = 1
     
 class ImageInfo(BaseModel):
-    id: constants.LENID
+    id: constants.LENSID
     name: str
     width: float
     height: float
-    raster_id: List[constants.LENID]
+    raster_id: List[constants.LENSID]
     raster_names: List[str]
     raster_types: List[constants.LENS_IMAGE_TYPE]
     lensMode: constants.LENS_MODE

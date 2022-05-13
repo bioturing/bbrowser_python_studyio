@@ -6,7 +6,7 @@ except:
 
 NUM = Union[int, float]
 
-LENID = Union[int, str]
+LENSID = Union[int, str]
 
 SPECIES_LIST = Literal["human", "mouse", "rat", "zebrafish", "fly",
                         "m_fascicularis", "other"]
