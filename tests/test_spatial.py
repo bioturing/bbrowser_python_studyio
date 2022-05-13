@@ -1,16 +1,12 @@
 import unittest
 import tempfile
 
-from walnut.models.spatial import ImageInfo
-
-
 class TestSpatial(unittest.TestCase):
     def __init__(self, methodName="runTest"):
         unittest.TestCase.__init__(self, methodName=methodName)
         from walnut.spatial import LensInfo, Spatial
-        from walnut.models import ImageInfo
 
-        self.__spatial_folder = "/Users/datth4/Desktop"
+        self.__spatial_folder = tempfile.mkdtemp()
         self.spatial_info = Spatial(self.__spatial_folder)
         self.lens_info = LensInfo(self.__spatial_folder)
 
@@ -63,7 +59,7 @@ class TestSpatial(unittest.TestCase):
         assert self.spatial_info.write() == True
 
     def test_add_lens(self):
-        self.lens_info.add(
+        assert self.lens_info.add(
             id= 2,
             name= "lens_2",
             width= 1000,
@@ -71,7 +67,7 @@ class TestSpatial(unittest.TestCase):
             raster_ids= [4, 5, 6],
             raster_names= ["channel4", "channel5", "channel6"],
             raster_types= ["truecolor"],
-            lensMode= "PUBLIC",)
+            lensMode= "PUBLIC") == True
 
         image_info = self.lens_info.get(2)
 

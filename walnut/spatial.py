@@ -6,6 +6,7 @@ from walnut.readers import Reader, TextReader
 from walnut.models import SpatialInfo, ImageInfo, LensImageInfo
 from typing import List
 from walnut.constants import LENSID
+from pydantic import ValidationError
 
 
 class LensInfo:
@@ -48,22 +49,13 @@ class LensInfo:
         raster_types: List[constants.LENS_IMAGE_TYPE],
         lensMode: constants.LENS_MODE
     ):
+        # check if id alread exists
         if self.get(id):
             print("WARNING: %s already exists" % id)
             return False
-
-        raster_length = len(raster_types)
-        # if multiplex, length of raster_types is equal to length of multiplex
-        if 'multiplex' in raster_types and raster_types.count('multiplex') != raster_length:
-            print("WARNING: raster_types of multiplex requires 3 in length")
-            return False
-
-        # if truecolor, length of raster_types is 1
-        if 'truecolor' in raster_types and not (raster_types.count('truecolor') == raster_length and raster_length == 1):
-            print("WARNING: raster_types of truecolor requires 1 in length")
-            return False
-
-        image_info = ImageInfo(id = id, 
+        # try to init ImageInfo
+        try:
+            image_info = ImageInfo(id = id, 
                                 name = name, 
                                 width = width, 
                                 height = height, 
@@ -72,9 +64,12 @@ class LensInfo:
                                 raster_types = raster_types,
                                 lensMode = lensMode)
 
-        self.lens_image_info.__root__.append(image_info)
+            self.lens_image_info.__root__.append(image_info)
 
-        return True
+            return True
+        except ValidationError as e:
+            print(e)
+            return False
     
     def getAll(self) -> List[ImageInfo]:
         return self.lens_image_info.__root__
@@ -142,39 +137,37 @@ class Spatial:
         return True
 
     def update_width(self, width: float):
-        if width == None:
-            print("WARNING: Width cannot be None")
+        try:
+            self.spatial_info.width = width
+            return True
+        except:
+            print("WARNING: Width cannot be %s" % type(width))
             return False
-
-        self.spatial_info.width = width
-
-        return True
 
     def update_height(self, height: float):
-        if height == None:
-            print("WARNING: Height cannot be None")
+        try:
+            self.spatial_info.height = height
+            return True
+        except:
+            print("WARNING: Height cannot be %s" % type(height))
             return False
-
-        self.spatial_info.height = height
-
-        return True
 
     def update_diamter(self, diameter: List[float]):
-        if diameter == None:
-            print("WARNING: Diameter cannot be None")
+        try:
+            self.spatial_info.diameter = diameter
+            return True
+        except:
+            print("WARNING: Diameter cannot be %s" % type(diameter))
             return False
 
-        self.spatial_info.diameter = diameter
-
-        return True
 
     def update_diameter_micron(self, diameter_micron: List[float]):
-        if diameter_micron == None:
-            print("WARNING: Diameter Micron cannot be None")
+        try:
+            self.spatial_info.diameter_micron = diameter_micron
+            return True
+        except:
+            print("WARNING: Diameter Micron cannot be %s" % type(diameter_micron))
             return False
 
-        self.spatial_info.diameter_micron = diameter_micron
-
-        return True
 
     
