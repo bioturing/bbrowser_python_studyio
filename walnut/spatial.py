@@ -74,8 +74,6 @@ class LensInfo:
 
         self.lens_image_info.__root__.append(image_info)
 
-        self.write()
-
         return True
     
     def getAll(self) -> List[ImageInfo]:
@@ -92,8 +90,6 @@ class LensInfo:
     def delete(self, id: LENSID):
         index = self.get_index(id)
         del self.lens_image_info.__root__[index]
-
-        self.write()
 
         return True
 
@@ -143,8 +139,6 @@ class Spatial:
             version=version
         )
 
-        self.write()
-
         return True
 
     def update_width(self, width: float):
@@ -153,7 +147,6 @@ class Spatial:
             return False
 
         self.spatial_info.width = width
-        self.write()
 
         return True
 
@@ -163,7 +156,6 @@ class Spatial:
             return False
 
         self.spatial_info.height = height
-        self.write()
 
         return True
 
@@ -173,7 +165,6 @@ class Spatial:
             return False
 
         self.spatial_info.diameter = diameter
-        self.write()
 
         return True
 
@@ -183,7 +174,6 @@ class Spatial:
             return False
 
         self.spatial_info.diameter_micron = diameter_micron
-        self.write()
 
         return True
 
