@@ -67,8 +67,8 @@ class LensInfo:
             self.lens_image_info.__root__.append(image_info)
 
             return True
-        except ValidationError as e:
-            print(e)
+        except Exception as e:
+            print("WARNING: %s" % e)
             return False
     
     def getAll(self) -> List[ImageInfo]:

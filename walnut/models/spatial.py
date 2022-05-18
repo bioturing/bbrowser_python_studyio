@@ -1,5 +1,5 @@
 from pydantic import BaseModel, validator
-from typing import List
+from typing import List, get_args
 
 from walnut import constants
 
@@ -31,13 +31,17 @@ class ImageInfo(BaseModel):
     @validator("raster_types", pre=True)
     def validate_raster_types(cls, v):
         raster_length = len(v)
+
+        if not any(x in get_args(constants.LENS_IMAGE_TYPE) for x in v):
+            raise ValueError("there is no lens image type in raster_types")
+
         # if multiplex, length of raster_types is equal to length of multiplex
         if 'multiplex' in v and v.count('multiplex') != raster_length:
-            raise ValueError("WARNING: raster_types of multiplex requires 3 in length")
+            raise ValueError("Length of raster_types does not match with the number of 'multiplex'")
 
         # if truecolor, length of raster_types is 1
         if 'truecolor' in v and not (v.count('truecolor') == raster_length and raster_length == 1):
-            raise ValueError("WARNING: raster_types of truecolor requires 1 in length")
+            raise ValueError("raster_types of truecolor requires 1 in length")
 
         return v
 

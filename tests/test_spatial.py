@@ -109,3 +109,31 @@ class TestSpatial(unittest.TestCase):
 
     def test_write_lens(self):
         assert self.lens_info.write() == True
+
+    def test_validation_error(self):
+        assert self.lens_info.add(id= 3,
+            name= "lens_3",
+            width= 1000,
+            height= 1000,
+            raster_ids= [7, 8, 9],
+            raster_names= ["channel7", "channel8", "channel9"],
+            raster_types= ["multiplex", "truecolor"],
+            lensMode= "PUBLIC") == False
+
+        assert self.lens_info.add(id= 3,
+            name= "lens_3",
+            width= 1000,
+            height= 1000,
+            raster_ids= [7, 8, 9],
+            raster_names= ["channel7", "channel8", "channel9"],
+            raster_types= ["truecolor", "truecolor"],
+            lensMode= "PUBLIC") == False
+
+        assert self.lens_info.add(id= 3,
+            name= "lens_3",
+            width= 1000,
+            height= 1000,
+            raster_ids= [7, 8, 9],
+            raster_names= ["channel7", "channel8", "channel9"],
+            raster_types= ["aaaa", "aaaa"],
+            lensMode= "PUBLIC") == False
