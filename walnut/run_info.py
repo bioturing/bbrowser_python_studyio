@@ -1,12 +1,11 @@
-from walnut import constants, common
 from walnut.converters import IORunInfo
 from walnut.readers import Reader
 from walnut.FileIO import FileIO
-from walnut import models
+from walnut import constants, models
 import os
 
 class RunInfo():
-    def __init__(self, filepath, reader: Reader):
+    def __init__(self, filepath: str, reader: Reader):
         self.__file = FileIO[models.RunInfo](filepath, reader, IORunInfo)
         self.__content = models.RunInfo(
             hash_id = os.path.basename(os.path.dirname(self.__file.path)),
@@ -23,8 +22,11 @@ class RunInfo():
 
         self.__content = self.__file.read()
     
-    def get_species(self):
+    def get_species(self) -> constants.SPECIES_LIST:
         return self.__content.species
-    
+
+    def get_content(self) -> models.RunInfo:
+        return self.__content.copy()
+
     def write(self):
         self.__file.write(self.__content)
