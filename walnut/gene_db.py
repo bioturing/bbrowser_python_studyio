@@ -1,7 +1,7 @@
 import os
 import pandas as pd
 from walnut import common
-from typing import List
+from typing import Dict, List, Optional
 import numpy as np
 from walnut.converters import IOAsIs
 from walnut.FileIO import FileIO
@@ -64,14 +64,33 @@ class StudyGeneDB(GeneDB):
         self.__ref = GeneDB(common.get_pkg_data(), species)
         self.__ref.read()
 
-    def create(self, gene_id: List[str], gene_name: List[str]=None):
-        """Create gene DB for a study given a list of genes (usually from matrix.hdf5)"""
+    def create(self, gene_id: List[str], gene_name: Optional[List[str]]=None):
+        """
+        Create gene DB for a study given a list of genes (usually from matrix.hdf5)
+        This will make sure gene_id are unique
+        If only gene name are available, convert to gene id based on current reference.
+        Following conversion, if duplicates are found in the resulting gene ids,
+        the corresponding original gene names will be kept
+        Argument:
+        - gene_id: list of gene id, no duplicates allowed
+        - gene_name: List of corresponding gene name.
+        If both are provided, gene_db will be written as is.
+        If only one list is available, always pass to `gene_id` argument
+        """
+
+        if not len(set(gene_id)) == len(gene_id):
+            raise ValueError("Please make sure `gene_id` contains no duplicates")
+
         if not gene_name:
             if self.__ref.is_id(gene_id):
                 gene_name = self.__ref.convert(gene_id, _from="gene_id", _to="name")
             else:
                 gene_name = gene_id
                 gene_id = self.__ref.convert(gene_id)
+                gene_id = self.__ensure_unique(gene_id, gene_name)
+        else:
+            assert len(gene_id) == len(gene_name)
+
 
         df = pd.DataFrame({"gene_id": gene_id, "name": gene_name, "primary": 1})
         self.from_df(df)
@@ -88,3 +107,26 @@ class StudyGeneDB(GeneDB):
             return super().is_id(ids)
         else:
             return self.__ref.is_id(ids)
+
+    
+    def __ensure_unique(self, gene_ids: List[str], gene_names: List[str]) -> List[str]:
+        """
+        Duplicates in gene_ids will be replaced with gene_names. The final array is then
+        forced into a list of unique labels.
+
+        Args:
+            gene_ids: a list of gene ids
+            gene_names: a list of gene names
+        """
+        assert len(gene_ids) == len(gene_names)
+
+        memo = set()
+        new_ids: List[str] = []
+        for i, gid in enumerate(gene_ids):
+            if gid in memo:
+                new_ids.append(gene_names[i])
+            else:
+                new_ids.append(gid)
+                memo.add(gid)
+        
+        return common.make_unique(new_ids)

@@ -22,3 +22,25 @@ def test_gene_db_creation():
     db = GeneDB(common.get_pkg_data(), study.run_info.get_species())
     db.read()
     assert db.is_id(df["gene_id"])
+
+
+def test_gene_db_creation_with_dup():
+    # Prepare data
+    
+    gene_db = GeneDB(common.get_pkg_data(), "human")
+    gene_db.read()
+    df = gene_db.to_df()
+    features = df['gene_id'][0:10000]
+
+    study_folder = tempfile.mkdtemp()
+    study = Study(study_folder)
+    study.gene_db.create(features)
+    study.gene_db.read()
+    df = study.gene_db.to_df()
+    assert sum(df['gene_id'].duplicated()) == 0
+    assert df.index.size == len(features)
+    db = GeneDB(common.get_pkg_data(), study.run_info.get_species())
+    db.read()
+    assert db.is_id(df["gene_id"])
+
+
