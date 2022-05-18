@@ -25,7 +25,7 @@ def test_gene_db_creation():
     assert db.is_id(df["gene_id"].tolist())
 
 
-def test_gene_db_creation_with_dup():
+def test_gene_db_creation_large_data():
     # Prepare data
     
     gene_db = GeneDB(os.path.join(common.get_pkg_data(), 'db'), "human")
