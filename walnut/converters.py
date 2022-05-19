@@ -104,7 +104,7 @@ class IOMetaDimred(IOConverter[MetaDimred]):
     @staticmethod
     def from_str(s: str) -> MetaDimred:
         return MetaDimred.parse_obj(json.loads(s))
-    
+
     @staticmethod
     def to_str(content: MetaDimred) -> str:
         return content.json()
@@ -113,7 +113,7 @@ class IOSingleDimred(IOConverter[SingleDimred]):
     @staticmethod
     def from_str(s: str) -> SingleDimred:
         return SingleDimred.parse_obj(json.loads(s))
-    
+
     @staticmethod
     def to_str(content: SingleDimred) -> str:
         return content.json()
@@ -121,7 +121,7 @@ class IOSingleDimred(IOConverter[SingleDimred]):
 class IOSpatial(IOConverter[SpatialInfo]):
     @staticmethod
     def from_str(s: str) -> SpatialInfo:
-        return SpatialInfo(__root__=json.loads(s))
+        return SpatialInfo.parse_raw(s)
 
     @staticmethod
     def to_str(content: SpatialInfo) -> str:

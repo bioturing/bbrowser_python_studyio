@@ -4,7 +4,7 @@ from walnut.converters import IOSpatial, IOLens
 from walnut.FileIO import FileIO
 from walnut.readers import Reader, TextReader
 from walnut.models import SpatialInfo, ImageInfo, LensImageInfo
-from typing import List
+from typing import List, Union, Optional
 from walnut.constants import LENSID
 from walnut import common
 from pydantic import ValidationError
@@ -12,38 +12,38 @@ from pydantic import ValidationError
 class LensInfo:
     def __init__(self, spatial_folder: str, reader: Reader = TextReader()):
         self.__dir = spatial_folder
-        self.__lens_image_info = FileIO(os.path.join(self.__dir, "lens_image_info.json"), reader, IOSpatial)
+        self.__lens_image_info = FileIO(os.path.join(self.__dir, "lens_image_info.json"), reader, IOLens)
 
         self.lens_image_info = LensImageInfo(__root__=[])
-    
+
     def exists(self) -> bool:
         return self.__lens_image_info.exists()
 
-    def read(self):
+    def read(self) -> bool:
         if not self.exists():
             print("WARNING: No Lens info to read")
             return False
 
         self.lens_image_info = self.__lens_image_info.read()
         return True
-    
+
     def write(self):
         self.__lens_image_info.write(self.lens_image_info)
 
         return True
 
-    def get(self, id: LENSID) -> ImageInfo:
+    def get(self, id: LENSID) -> Union[ImageInfo, bool]:
         for image_info in self.lens_image_info.__root__:
             if str(image_info.id) == str(id):
                 return image_info
-        
+
         return False
 
-    def add(self, 
-        id: constants.LENSID, 
-        name: str, 
-        width: float, 
-        height: float, 
+    def add(self,
+        id: constants.LENSID,
+        name: str,
+        width: float,
+        height: float,
         raster_ids: List[constants.LENSID],
         raster_names: List[str],
         raster_types: List[constants.LENS_IMAGE_TYPE],
@@ -55,10 +55,10 @@ class LensInfo:
             return False
         # try to init ImageInfo
         try:
-            image_info = ImageInfo(id = id, 
-                                name = name, 
-                                width = width, 
-                                height = height, 
+            image_info = ImageInfo(id = id,
+                                name = name,
+                                width = width,
+                                height = height,
                                 raster_ids = raster_ids,
                                 raster_names = raster_names,
                                 raster_types = raster_types,
@@ -70,7 +70,7 @@ class LensInfo:
         except Exception as e:
             print("WARNING: %s" % e)
             return False
-    
+
     def getAll(self) -> List[ImageInfo]:
         return self.lens_image_info.__root__
 
@@ -78,7 +78,7 @@ class LensInfo:
         for i, image_info in enumerate(self.lens_image_info.__root__):
             if str(image_info.id) == str(id):
                 return i
-        
+
         print("WARNING: %s does not exist" % id)
         return False
 
@@ -90,19 +90,19 @@ class LensInfo:
 
 
 class Spatial:
-    def __init__(self, 
-        spatial_folder: str, 
-        spatial_info: SpatialInfo = None,
+    def __init__(self,
+        spatial_folder: str,
+        spatial_info: Optional[SpatialInfo] = None,
         reader: Reader = TextReader()
     ):
         self.__dir = spatial_folder
-        self.__spatial_info = FileIO(os.path.join(self.__dir, "info.json"), reader, IOLens)
+        self.__spatial_info = FileIO(os.path.join(self.__dir, "info.json"), reader, IOSpatial)
 
-        self.spatial_info = spatial_info if spatial_info != None else SpatialInfo()
-        
+        self.spatial_info = spatial_info or SpatialInfo()
+
     def exists(self):
         return self.__spatial_info.exists()
-    
+
     def get(self) -> SpatialInfo:
         return self.spatial_info
 
@@ -110,7 +110,7 @@ class Spatial:
         if not self.exists():
             print("WARNING: No spatial info to read")
             return False
-        
+
         self.spatial_info = self.__spatial_info.read()
         return True
 
@@ -118,12 +118,12 @@ class Spatial:
         self.__spatial_info.write(self.spatial_info)
 
         return True
-    
+
     def update(self,
         width: float,
-        height: float, 
-        diameter: List[float], 
-        diameter_micron: List[float], 
+        height: float,
+        diameter: List[float],
+        diameter_micron: List[float],
         version: int = 1
     ):
         try:
@@ -173,4 +173,3 @@ class Spatial:
             return False
 
 
-    
