@@ -21,7 +21,10 @@ class Dimred:
 		self.__meta: MetaDimred = MetaDimred()
 		self.__dimreds: Dict[str, SingleDimred] = {}
 
-		self.read()
+		try:
+			self.read()
+		except:
+			print("WARNING: Unable to initialize dimred")
 
 	def read(self) -> None:
 
