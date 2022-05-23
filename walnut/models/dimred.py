@@ -5,15 +5,15 @@ from walnut import common
 
 
 class SingleDimredBase(BaseModel):
-	id: Optional[str]
+	id: Optional[str] = None
 	name: str
 	size: List[int]
 	history: List[History] = [common.create_history()]
-	param: Optional[dict]
+	param: Optional[dict] = {}
 
 class SingleDimred(SingleDimredBase):
-	coords: Optional[List[List[float]]]
-	slide: Optional[List[str]]
+	coords: Optional[List[List[float]]] = None
+	slide: Optional[List[str]] = None
 
 	@root_validator(pre=True)
 	def either_coords_or_slide_must_exist(cls, values):
