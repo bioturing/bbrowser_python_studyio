@@ -38,7 +38,7 @@ class SingleDimred(SingleDimredBase):
 class MetaDimred(BaseModel):
 	data: Dict[str, SingleDimredBase] = {}
 	default: Optional[str] = ""
-	version: Optional[int] = 0
+	version: Optional[int] = 1
 	bbrowser_version: Optional[str] = ""
 
 	def get_dimred_ids(self) -> List[str]:
