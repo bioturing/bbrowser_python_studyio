@@ -29,7 +29,7 @@ class StudyStructure:
 class Study:
     def __init__(self, study_folder, reader: Reader = TextReader()):
         self.__location = StudyStructure(study_folder)
-        # self.metadata = Metadata(self.__location.metadata, reader)
+        self.metadata = Metadata(self.__location.metadata, reader)
         self.expression = Expression(self.__location.h5matrix)
         self.run_info = RunInfo(self.__location.run_info, reader)
         self.dimred = Dimred(self.__location.dimred, reader)
@@ -45,7 +45,7 @@ class Study:
             # does not exists, creates one from the row names of count matrix
             if not self.gene_db.exists():
                 self.gene_db.create(self.expression.features())
-    
+
     def exists(self) -> bool:
         return self.run_info.exists() and self.expression.exists()
 
@@ -69,7 +69,7 @@ class Study:
           coords_list = coords.to_numpy().tolist()
         else:
           raise ValueError('coords must be of type pandas.DataFrame or numpy.ndarray')
-        
+
         size = list(coords.shape)
 
         dimred_id = self.dimred.add({'name': name,
@@ -78,7 +78,7 @@ class Study:
                                      'size': size
                                     })
         self.dimred.write()
-        
+
         return dimred_id
 
     def remove_dimred(self, dimred_id: str):

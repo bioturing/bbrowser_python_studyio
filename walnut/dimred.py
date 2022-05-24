@@ -5,10 +5,9 @@ from walnut.FileIO import FileIO
 from walnut.readers import Reader
 from walnut.models import SingleDimred, SingleDimredBase, MetaDimred
 import pydantic
-from pydantic import validator, validate_arguments
-from typing import List, Union, Type
+from pydantic import validate_arguments
+from typing import List, Dict, Optional
 import pandas as pd
-import numpy
 
 class Dimred:
 
@@ -21,18 +20,21 @@ class Dimred:
 		self.__file_reader = file_reader
 		self.__meta: MetaDimred = MetaDimred()
 		self.__dimreds: Dict[str, SingleDimred] = {}
-		
-		self.read()
+
+		try:
+			self.read()
+		except:
+			print("WARNING: Unable to initialize dimred")
 
 	def read(self) -> None:
-		
+
 		if self.__get_meta_io().exists():
 			self.__meta = self.__get_meta_io().read()
-		
+
 		self.__read_dimreds()
 
 		self.__purge_invalid_dimreds()
-	
+
 	def write(self) -> None:
 		self.__get_meta_io().write(self.__meta)
 
@@ -51,7 +53,7 @@ class Dimred:
 				# Skip multislide dimred
 				if not single_dimred.is_multislide:
 					self.__dimreds[dimred_id] = single_dimred
-					
+
 
 			except pydantic.ValidationError as e:
 				print("WARNING: Unable to parse category %s due to error: %s"
@@ -60,7 +62,7 @@ class Dimred:
 				print("WARNING: Unable to read category %s due to error: %s"
 						% (dimred_id, str(e)))
 
-	
+
 	def __get_meta_io(self) -> FileIO[MetaDimred]:
 		return FileIO[MetaDimred](self.__get_meta_path(),
 									reader=self.__file_reader,
@@ -92,9 +94,9 @@ class Dimred:
 	@validate_arguments
 	def add(self, new_dimred: SingleDimred):
 		single_dimred = new_dimred.copy()
-		
+
 		if single_dimred.id:
-			dimred_id = single_dimred.id 
+			dimred_id = single_dimred.id
 		else:
 			dimred_id = common.create_uuid()
 			single_dimred.id = dimred_id
@@ -116,7 +118,7 @@ class Dimred:
 		if not dimred_id in self.ids:
 			print("% s dimred not found" % dimred_id)
 			return False
-		
+
 		self.__meta.remove_dimred(dimred_id)
 		del self.__dimreds[dimred_id]
 
@@ -126,16 +128,16 @@ class Dimred:
 		return True
 
 	def __purge_invalid_dimreds(self) -> None:
-				
+
 				existing_dimreds_id = [x for x in self.__dimreds]
-				
+
 				# This will also delete multislide dimred, skipped for now
 				# for invalid_dimred_id in numpy.setdiff1d(self.__meta.get_dimred_ids(),
 				# 																						existing_dimreds_id):
 				# 		print("WARNING: Removing invalid dimred %s in metalist"
 				# 						% invalid_dimred_id)
 				# 		self.__meta.remove_dimred(invalid_dimred_id)
-				
+
 				default_dimred = self.__meta.default
 				if default_dimred and not default_dimred in existing_dimreds_id:
 						print("WARNING: Default dimred %s not found"

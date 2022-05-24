@@ -15,15 +15,16 @@ class Metadata:
     def __init__(self, metadata_folder: str, file_reader: Reader):
         self.__dir = metadata_folder
         self.__file_reader = file_reader
-        self.__metalist: Metalist = None
+        self.__metalist = Metalist(content={})
         self.__categories: Dict[str, Category] = {}
-
-        self.read()
+        try:
+            self.read()
+        except:
+            print("WARNING: Unable to initialize metadata")
 
     def read(self) -> None:
         self.__metalist = self.__get_metalist_io().read()
-
-        self.__read_categories()
+        self.__categories = self.__read_categories()
 
         self.__purge_invalid_categories()
 
@@ -132,7 +133,8 @@ class Metadata:
     def __get_category_path(self, category_id: str) -> str:
         return os.path.join(self.__dir, category_id + ".json")
 
-    def __read_categories(self) -> None:
+    def __read_categories(self) -> Dict[str, Category]:
+        categories: Dict[str, Category] = {}
         for category_id in self.__metalist.get_category_ids():
             category_io = self.__get_category_io(category_id)
             try:
@@ -141,14 +143,14 @@ class Metadata:
                     **self.__metalist.get_category_meta(category_id).dict()
                 }
                 category = Category.parse_obj(items)
-                self.__categories[category_id] = category
+                categories[category_id] = category
             except pydantic.ValidationError as e:
                 print("WARNING: Unable to parse category %s due to error: %s"
                         % (category_id, str(e)))
             except Exception as e:
                 print("WARNING: Unable to read category %s due to error: %s"
                         % (category_id, str(e)))
-
+        return categories
 
     def __purge_invalid_categories(self) -> None:
         existing_categories_id = [id for id in self.__categories]

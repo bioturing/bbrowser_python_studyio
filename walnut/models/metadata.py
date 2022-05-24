@@ -42,8 +42,8 @@ class Category(CategoryBase):
     clusters: Union[List[int], List[float]]
 
 class Metalist(BaseModel):
-    version: Optional[int]
-    default: Optional[str]
+    version: Optional[int] = None
+    default: Optional[str] = None
     content: Dict[str, CategoryMeta]
 
     @validator("content", pre=True)
