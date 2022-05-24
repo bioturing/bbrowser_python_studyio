@@ -59,12 +59,10 @@ class Study:
         self.gallery.write()
         return col_id
 
-    def add_dimred(self, coords: np.ndarray, name: str, id: Optional[str]=None, param: Optional[dict]=None) -> str:
+    def add_dimred(self, coords: np.ndarray, name: str, id: Optional[str]=None) -> str:
         """Add new dimred and return id of successfully added dimred"""
         if id is None:
           id = create_uuid()
-        if param is None:
-          param = {"omics": "RNA"}
         if isinstance(coords, np.ndarray):
           coords_list = coords.tolist()
         elif isinstance(coords, pd.DataFrame):
@@ -77,8 +75,7 @@ class Study:
         dimred_id = self.dimred.add({'name': name,
                                      'id': id,
                                      'coords': coords_list,
-                                     'size': size,
-                                     'param': param,
+                                     'size': size
                                     })
         self.dimred.write()
 
