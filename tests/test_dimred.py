@@ -68,7 +68,7 @@ def test_existing_dimred():
 	new_dimred = {
 		'id': 'abc',
 		'name': 'xyz',
-		'param': {'omics': 'A very weird omics'},
+		'param': {'omics': 'ADT'},
 		'size': [10,3],
 		'coords': [[1.5,2.1], [3.2,4.3], [5,6]]
 	}
@@ -77,7 +77,7 @@ def test_existing_dimred():
 	new_dimred_2 = {
 		'id': 'abc',
 		# 'name': 'xyz',
-		'param': {'omics': 'A very weird omics'},
+		'param': {'omics': 'PRTB'},
 		'size': [10,3],
 		'coords': [[1.5,2.1], [3.2,4.3], [5,6]]
 	}
@@ -100,7 +100,7 @@ def test_dimred_iterable():
 	new_dimred = {
 		# 'id': 'abc',
 		'name': 'xyz',
-		'param': {'omics': 'A very weird omics'},
+		'param': {'omics': 'RNA'},
 		'size': [10,3],
 		'coords': [[1.5,2.1], [3.2,4.3], [5,6]]
 	}
