@@ -7,7 +7,7 @@ from walnut.gene_db import StudyGeneDB
 from walnut.models import ExpressionData
 from pydantic import validate_arguments, ValidationError
 from walnut import constants, common
-from typing import Union, List
+from typing import Union, List, Literal
 
 
 
@@ -29,10 +29,10 @@ class Expression:
 			barcodes = [x.decode() for x in fopen["bioturing/barcodes"][:]]
 			features = [x.decode() for x in fopen["bioturing/features"][:]]
 
-			if "feature_type" in fopen['bioturing'].keys(): # Old study does not have feature_type
+			if "feature_type" in fopen["bioturing"].keys(): # Old study does not have feature_type
 				feature_type = [x.decode() for x in fopen["bioturing/feature_type"][:].flatten()] # Tolerate weird shape of feature_type
 			else :
-				print('WARNING: This study does not contain info for feature type')
+				print("WARNING: This study does not contain info for feature type")
 				feature_type = [self.detect_feature_type(x) for x in features]
 
 		raw_matrix = sparse.csc_matrix(
@@ -63,7 +63,7 @@ class Expression:
 
 
 	@property
-	def features(self):
+	def features(self) -> List[str]:
 		if not self.__expression_data:
 			self.__read_expression_data()
 		
@@ -74,7 +74,7 @@ class Expression:
 
 
 	@property
-	def barcodes(self):
+	def barcodes(self) -> List[str]:
 		if not self.__expression_data:
 			self.__read_expression_data()
 		
@@ -85,7 +85,7 @@ class Expression:
 
 
 	@property
-	def feature_type(self):
+	def feature_type(self) -> List[Literal[constants.FEATURE_TYPES]]:
 		if not self.__expression_data:
 			self.__read_expression_data()
 		
@@ -96,7 +96,7 @@ class Expression:
 	
 	
 	@property
-	def raw_matrix(self):
+	def raw_matrix(self) -> sparse.csc_matrix:
 		if not self.__expression_data:
 			self.__read_expression_data()
 		
@@ -107,7 +107,7 @@ class Expression:
 	
 	
 	@property
-	def norm_matrix(self):
+	def norm_matrix(self) -> sparse.csc_matrix:
 		if not self.__expression_data:
 			self.__read_expression_data()
 		
@@ -118,15 +118,15 @@ class Expression:
 
 
 	@staticmethod
-	def detect_feature_type(feature: str):
-		prefix = feature.split('-')[0]
+	def detect_feature_type(feature: str) -> Literal[constants.FEATURE_TYPES]:
+		prefix = feature.split("-")[0]
 		if prefix in constants.FEATURE_TYPES:
 			return prefix
-		return 'RNA'
+		return "RNA"
 	
 	
 	@staticmethod
-	def normalize_expression(raw_matrix):
+	def normalize_expression(raw_matrix: sparse.csc_matrix) -> sparse.csc_matrix:
 		import scanpy as sc
 		import anndata
 		adata = anndata.AnnData(raw_matrix)
@@ -156,7 +156,7 @@ class Expression:
 												feature_type=feature_type)
 
 
-	def write(self):
+	def write(self) -> bool:
 		if self.__expression_data is None:
 			print("WARNING: Expression data has not been assigned")
 			return False
@@ -165,47 +165,47 @@ class Expression:
 			return False
 		feature_type = self.__expression_data.feature_type
 
-		barcodes = pd.DataFrame({'barcodes': self.__expression_data.barcodes})
+		barcodes = pd.DataFrame({"barcodes": self.__expression_data.barcodes})
 
 		genes = pd.DataFrame({
-				'genes': self.__expression_data.features,
-				'feature_type': feature_type,
+				"genes": self.__expression_data.features,
+				"feature_type": feature_type,
 			})
 		matrix = self.__expression_data.raw_matrix
 		with h5py.File(self.path, "w") as out_file:
-			group = out_file.create_group('bioturing')
-			group.create_dataset('barcodes', data=barcodes['barcodes'].values.astype('S'))
-			group.create_dataset('features', data=genes['genes'].values.astype('S'))
-			group.create_dataset('data', data=matrix.data)
-			group.create_dataset('indices', data=matrix.indices)
-			group.create_dataset('indptr', data=matrix.indptr)
-			group.create_dataset('shape', data=[matrix.shape[0], matrix.shape[1]])
-			group.create_dataset('feature_type', data=genes['feature_type'].values.astype('S'))
-			colsum = out_file.create_group('colsum')
-			colsum.create_dataset('raw', data=np.array(matrix.sum(axis=0))[0])
+			group = out_file.create_group("bioturing")
+			group.create_dataset("barcodes", data=barcodes["barcodes"].values.astype("S"))
+			group.create_dataset("features", data=genes["genes"].values.astype("S"))
+			group.create_dataset("data", data=matrix.data)
+			group.create_dataset("indices", data=matrix.indices)
+			group.create_dataset("indptr", data=matrix.indptr)
+			group.create_dataset("shape", data=[matrix.shape[0], matrix.shape[1]])
+			group.create_dataset("feature_type", data=genes["feature_type"].values.astype("S"))
+			colsum = out_file.create_group("colsum")
+			colsum.create_dataset("raw", data=np.array(matrix.sum(axis=0))[0])
 
 			matrix = matrix.transpose().tocsc() # Sparse matrix have to be csc (legacy)
-			group = out_file.create_group('countsT')
-			group.create_dataset('features', data=barcodes['barcodes'].values.astype('S'))
-			group.create_dataset('barcodes', data=genes['genes'].values.astype('S'))
-			group.create_dataset('data', data=matrix.data)
-			group.create_dataset('indices', data=matrix.indices)
-			group.create_dataset('indptr', data=matrix.indptr)
-			group.create_dataset('shape', data=[matrix.shape[0], matrix.shape[1]])
+			group = out_file.create_group("countsT")
+			group.create_dataset("features", data=barcodes["barcodes"].values.astype("S"))
+			group.create_dataset("barcodes", data=genes["genes"].values.astype("S"))
+			group.create_dataset("data", data=matrix.data)
+			group.create_dataset("indices", data=matrix.indices)
+			group.create_dataset("indptr", data=matrix.indptr)
+			group.create_dataset("shape", data=[matrix.shape[0], matrix.shape[1]])
 
 			matrix.data = np.log2(matrix.data + 1) # log2 of just non-zeros
-			colsum.create_dataset('log', data=np.array(matrix.sum(axis=1).reshape(-1))[0]) # Sum of rows for transposed mat
+			colsum.create_dataset("log", data=np.array(matrix.sum(axis=1).reshape(-1))[0]) # Sum of rows for transposed mat
 
 			norm_matrix = self.__expression_data.norm_matrix
-			colsum.create_dataset('lognorm', data=np.array(norm_matrix.sum(axis=0))[0])
+			colsum.create_dataset("lognorm", data=np.array(norm_matrix.sum(axis=0))[0])
 
 			matrix = norm_matrix.transpose().tocsc() # Sparse matrix have to be csc (legacy)
-			group = out_file.create_group('normalizedT')
-			group.create_dataset('features', data=barcodes['barcodes'].values.astype('S'))
-			group.create_dataset('barcodes', data=genes['genes'].values.astype('S'))
-			group.create_dataset('data', data=matrix.data)
-			group.create_dataset('indices', data=matrix.indices)
-			group.create_dataset('indptr', data=matrix.indptr)
-			group.create_dataset('shape', data=[matrix.shape[0], matrix.shape[1]])
+			group = out_file.create_group("normalizedT")
+			group.create_dataset("features", data=barcodes["barcodes"].values.astype("S"))
+			group.create_dataset("barcodes", data=genes["genes"].values.astype("S"))
+			group.create_dataset("data", data=matrix.data)
+			group.create_dataset("indices", data=matrix.indices)
+			group.create_dataset("indptr", data=matrix.indptr)
+			group.create_dataset("shape", data=[matrix.shape[0], matrix.shape[1]])
 
 		return True

@@ -14,7 +14,7 @@ class Dimred:
 	def __init__(self, dimred_folder: str, file_reader: Reader):
 		"""
 		Args:
-			dimred_folder (str): 'GSE111111/main/dimred' or GSE11111/sub/[sub_id]/dimred
+			dimred_folder (str): "GSE111111/main/dimred" or GSE11111/sub/[sub_id]/dimred
 		"""
 		self.__dir = dimred_folder
 		self.__file_reader = file_reader
@@ -74,7 +74,7 @@ class Dimred:
 										converter=IOSingleDimred)
 
 	def __get_meta_path(self) -> str:
-		return os.path.join(self.__dir, 'meta')
+		return os.path.join(self.__dir, "meta")
 
 	def __get_single_dimred_path(self, dimred_id: str) -> str:
 		return os.path.join(self.__dir, dimred_id)
@@ -102,7 +102,7 @@ class Dimred:
 			single_dimred.id = dimred_id
 
 		if dimred_id in self.ids:
-			print('WARNING: id % s already exists, please use another one or leave id slot empty' % dimred_id)
+			print("WARNING: id % s already exists, please use another one or leave id slot empty" % dimred_id)
 			return None
 
 		dimred_meta = SingleDimredBase(**single_dimred.dict())
@@ -149,7 +149,7 @@ class Dimred:
 
 
 	def __repr__(self):
-		return repr(pd.DataFrame({'IDs':self.ids, 'Names': self.names, 'Shape': self.sizes}))
+		return repr(pd.DataFrame({"IDs":self.ids, "Names": self.names, "Shape": self.sizes}))
 
 	def __iter__(self):
 		self.__max = len(self.ids) - 1

@@ -20,23 +20,23 @@ class SingleDimred(SingleDimredBase):
 
 	@root_validator(pre=True)
 	def either_coords_or_slide_must_exist(cls, values):
-		coords, slide = values.get('coords'), values.get('slide')
+		coords, slide = values.get("coords"), values.get("slide")
 		if coords is None and slide is None:
-			raise ValueError('Either coords or slide must be present in Dimred content')
+			raise ValueError("Either coords or slide must be present in Dimred content")
 		return values
 
 	@root_validator(pre=False)
 	def delete_extraneous_values(cls, values):
-		coords, slide = values.get('coords'), values.get('slide')
+		coords, slide = values.get("coords"), values.get("slide")
 		if coords is None:
-			del values['coords']
+			del values["coords"]
 		if slide is None:
-			del values['slide']
+			del values["slide"]
 		return values
 
 	@property
 	def is_multislide(self):
-		return getattr(self, 'slide', False)
+		return getattr(self, "slide", False)
 
 class MetaDimred(BaseModel):
 	data: Dict[str, SingleDimredBase] = {}
