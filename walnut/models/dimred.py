@@ -1,15 +1,18 @@
 from pydantic import BaseModel, root_validator
-from typing import List, Optional, Union, Dict
+from typing import List, Optional, Dict
 from walnut.models import History
-from walnut import common
+from walnut import common, constants
 
+class Param(BaseModel):
+	omics: Optional[constants.OMICS_LIST] = "RNA"
+	correction: Optional[str] = "none"
 
 class SingleDimredBase(BaseModel):
 	id: Optional[str] = None
 	name: str
 	size: List[int]
 	history: List[History] = [common.create_history()]
-	param: Optional[dict] = {}
+	param: Optional[Param] = Param()
 
 class SingleDimred(SingleDimredBase):
 	coords: Optional[List[List[float]]] = None
