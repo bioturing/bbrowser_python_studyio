@@ -1,5 +1,6 @@
 import os
 from typing import List, Dict, Collection, Tuple, Union
+import pydantic
 import pandas
 import numpy
 import pydantic
@@ -184,29 +185,21 @@ class Metadata:
                     % invalid_category_id)
             self.__metalist.remove_category(invalid_category_id)
     
-    def get_content_by_id(self, id:str, _get_config:Dict) -> Category:
-        get_config = {
-            "withClusters": True,
-            "skipConvert": False
-        }
-        get_config.update(_get_config)
-        if not self.__metalist.content.get(id, False):
-            return False
-        content = self.__categories.get(id)
-        if (not content.clusters) or (not hasattr(content.clusters, '__len__')) and (get_config["withClusters"]):
-            clusters = EncryptedTextReader(self.__get_category_path(id), os.environ['e32dc2'])
-            content.clusters = list(map(lambda cl: cl if cl else float('NaN'), clusters))
-        return filter_cluster(count_cluster_length(category=content)) if len(content.clusterName) != len(content.clusterLength) else content 
+    def get_content_by_id(self, id: str) -> Category:
+        return self.__categories[id]
 
-    def add_label(self, category_id: str, value: Union[str, int, float], indexes: List[int]) -> Category:
-        get_config = {"skipConvert": True}
-        content = self.get_content_by_id(category_id, get_config)
-        if value not in content.clusterName:
-            anno_id = len(content.clusterName)
-            content.clusterName.append(value)
-        else:
-            anno_id = content.clusterName.index(value)
-        for idx in indexes:
-            content.clusters[idx] = anno_id
-        return content
+    def add_label(self, category_id: str, value: Union[str, int, float], indices: List[int]) -> None:
+        content = self.__categories[category_id]
+        if content.type == constants.METADATA_TYPE_CATEGORICAL:
+            assert isinstance(value, str)
+            if value in content.clusterName:
+                anno_id = content.clusterName.index(value)
+            else:
+                anno_id = len(content.clusterName)
+                content.clusterName.append(value)
+
+            for idx in indices:
+                content.clusters[idx] = anno_id
+        
+        self.__categories[category_id] = content
 

@@ -89,6 +89,7 @@ def is_number(x) -> bool:
 
 def get_pkg_data():
     return os.path.join(os.path.dirname(constants.__file__), "data")
+<<<<<<< HEAD
 
 def exc_to_str(e):
     return "%s: %s" % (e.__class__.__name__, str(e))
@@ -115,3 +116,5 @@ def is_dense(mtx: Union[sparse.csc_matrix, sparse.csr_matrix], threshold: float=
     2/3 is ad-hoc value
     """
     return get_density(mtx) > threshold
+=======
+>>>>>>> 94ce51f (unit test)
