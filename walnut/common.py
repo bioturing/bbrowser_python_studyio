@@ -74,7 +74,6 @@ def create_history() -> History:
                     hash_id=create_uuid(),
                     description="Created automatically")  # type: ignore
 
-
 def find_indices_in_list(needles: Collection, haystack: Collection) -> List[int]:
     if len(numpy.unique(list(haystack))) != len(haystack):
         raise ValueError("haystack must not contain any duplicate items")

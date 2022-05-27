@@ -1,4 +1,5 @@
-from typing import Optional, List, Union, Dict
+from typing import Optional, List, Union, Dict, Any
+from xmlrpc.client import boolean
 from pydantic import BaseModel, validator
 import numpy
 
@@ -79,3 +80,77 @@ class Metalist(BaseModel):
 
         self.content[category.id] = category
 
+class MetadataType(BaseModel):
+    typeList: Dict[str, Dict[str, str]] = {
+        constants.METADATA_TYPE_CATEGORICAL: {"name": "Category", "desc": "Labels simply are strings"},
+        constants.METADATA_TYPE_NUMERIC: {"name": "Numeric", "desc": "Labels are numbers"}
+    }
+    cellTypes: Dict = {}
+    maxClusters: int
+
+    def get(self, type) -> Dict:
+        if type:
+            return self.typeList.get(type, {})
+        else:
+            return self.typeList
+
+    def is_category(self, metadata) -> boolean:
+        return metadata and metadata.type == constants.METADATA_TYPE_CATEGORICAL
+    
+    def is_numeric(self, metadata) -> boolean:
+        return metadata and metadata.type == constants.METADATA_TYPE_NUMERIC
+    
+    def convert_to_category(self, metadata):
+        if self.is_cell_type(metadata):
+            metadata.clusterName = list(map(lambda x: self.cellTypes.get(x) or constants.UNASSIGNED))
+        elif self.is_numeric(metadata):
+            new_cluster_name = list(float(x) for x in set(filter(lambda x: x == x, metadata.clusters)))
+            assert (new_cluster_name.length < self.maxClusters), f"Can not convert to category, this metadata have more than {max_clusters} labels."
+            mapping = {}
+            new_cluster_name = ['Unassigned'] + list(sorted(new_cluster_name))
+            for idx, label in enumerate(new_cluster_name):
+                mapping[label] = idx
+            cluster_length = [0]*len(new_cluster_name)
+            for idx, cluster in enumerate(metadata.clusters):
+                cluster = float(cluster)
+                metadata.clusters[idx] = mapping[cluster] if cluster and cluster == cluster else 0
+                cluster_length[mapping[cluster]] += 1
+            metadata.clusterName = new_cluster_name
+            metadata.clusterLength = cluster_length
+        return metadata
+
+    def convert_to_numeric(self, metadata):
+        for idx in range(len(metadata.clusterName)):
+            if idx == 0: continue
+            assert ((float(metadata.clusterName[idx]) == float(metadata.clusterName[idx])) or (metadata.clusterName[idx] == metadata.clusterName[idx])), "Name of clusters must be numeric"
+        for idx, cluster in enumerate(metadata.clusters):
+            metadata.clusters[idx] = float('NaN') if cluster == 0 else float(metadata.clusterName[cluster])
+        return metadata
+
+    def convert(self, metadata, type):
+        if self.typeList.get(type):
+            metadata.history.append(common.create_commit({"description": f"Change type from {self.typeList[metadata.type]['name']} to {self.typeList[type]['name']}"}))
+            switcher = {
+                constants.METADATA_TYPE_CATEGORICAL: self.convert_to_category(metadata),
+                constants.METADATA_TYPE_NUMERIC: self.convert_to_numeric(metadata)
+            }
+            metadata = switcher.get(type)
+            metadata.type = type
+            return metadata
+        return None
+
+class GraphClusterInfo(BaseModel):
+    id: str
+    name: str
+    history: List[History]
+    length: int
+    version: int
+    parent_id: str
+
+class GraphClusterDetail(GraphClusterInfo):
+    img: str
+    selectedArr: List[int]
+    
+class GraphCluster(BaseModel):
+    content: List[GraphClusterInfo]
+    version: int
