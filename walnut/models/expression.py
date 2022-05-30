@@ -16,7 +16,6 @@ class ExpressionData(BaseModel):
 
     @validator("raw_matrix", pre=False)
     def check_raw(cls, v):
-        print(v.min())
         if v.min() < 0:
             raise ValueError("Raw count matrix with negative values are not supported")
         return v.tocsc()

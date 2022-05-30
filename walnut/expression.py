@@ -1,13 +1,11 @@
-import h5py
+from typing import Union, List, Literal
 import os
+import h5py
 import pandas as pd
 import numpy as np
 from scipy import sparse
-from walnut.gene_db import StudyGeneDB
 from walnut.models import ExpressionData
-from pydantic import validate_arguments, ValidationError
-from walnut import constants, common
-from typing import Union, List, Literal
+from walnut import constants
 
 class Expression:
     def __init__(self, h5path):
@@ -204,6 +202,7 @@ def write_sparse_matrix(f, key, matrix, barcodes, features, feature_type=None):
 
 def write_array(f, key, value):
     if value.dtype.kind in {"U", "O"}:
+        # A` la anndata, will fail with compound dtypes
         value = value.astype(h5py.special_dtype(vlen=str))
     f.create_dataset(key, data=value)
 
