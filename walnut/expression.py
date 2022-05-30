@@ -9,8 +9,6 @@ from pydantic import validate_arguments, ValidationError
 from walnut import constants, common
 from typing import Union, List, Literal
 
-
-
 class Expression:
     def __init__(self, h5path):
         self.path = h5path
@@ -163,49 +161,51 @@ class Expression:
         if self.exists:
             print("WARNING: matrix.hdf5 has been written, cannot overwrite")
             return False
-        feature_type = self.__expression_data.feature_type
 
-        barcodes = pd.DataFrame({"barcodes": self.__expression_data.barcodes})
-
-        genes = pd.DataFrame({
-                "genes": self.__expression_data.features,
-                "feature_type": feature_type,
-            })
-        matrix = self.__expression_data.raw_matrix
+        matrix = self.raw_matrix
         with h5py.File(self.path, "w") as out_file:
-            group = out_file.create_group("bioturing")
-            group.create_dataset("barcodes", data=barcodes["barcodes"].values.astype("S"))
-            group.create_dataset("features", data=genes["genes"].values.astype("S"))
-            group.create_dataset("data", data=matrix.data)
-            group.create_dataset("indices", data=matrix.indices)
-            group.create_dataset("indptr", data=matrix.indptr)
-            group.create_dataset("shape", data=[matrix.shape[0], matrix.shape[1]])
-            group.create_dataset("feature_type", data=genes["feature_type"].values.astype("S"))
+            write_sparse_matrix(out_file, "bioturing", matrix=matrix, barcodes=self.barcodes,
+                                    features=self.features, feature_type=self.feature_type)
+
             colsum = out_file.create_group("colsum")
             colsum.create_dataset("raw", data=np.array(matrix.sum(axis=0))[0])
 
             matrix = matrix.transpose().tocsc() # Sparse matrix have to be csc (legacy)
-            group = out_file.create_group("countsT")
-            group.create_dataset("features", data=barcodes["barcodes"].values.astype("S"))
-            group.create_dataset("barcodes", data=genes["genes"].values.astype("S"))
-            group.create_dataset("data", data=matrix.data)
-            group.create_dataset("indices", data=matrix.indices)
-            group.create_dataset("indptr", data=matrix.indptr)
-            group.create_dataset("shape", data=[matrix.shape[0], matrix.shape[1]])
+            write_sparse_matrix(out_file, key="countsT", matrix=matrix, barcodes=self.features,
+                                    features=self.barcodes)
 
-            matrix.data = np.log2(matrix.data + 1) # log2 of just non-zeros
-            colsum.create_dataset("log", data=np.array(matrix.sum(axis=1).reshape(-1))[0]) # Sum of rows for transposed mat
+            # log2 of just non-zeros
+            matrix.data = np.log2(matrix.data + 1)
 
-            norm_matrix = self.__expression_data.norm_matrix
+            # Sum of rows for transposed mat
+            colsum.create_dataset("log", data=np.array(matrix.sum(axis=1).reshape(-1))[0])
+
+            norm_matrix = self.norm_matrix
             colsum.create_dataset("lognorm", data=np.array(norm_matrix.sum(axis=0))[0])
 
             matrix = norm_matrix.transpose().tocsc() # Sparse matrix have to be csc (legacy)
-            group = out_file.create_group("normalizedT")
-            group.create_dataset("features", data=barcodes["barcodes"].values.astype("S"))
-            group.create_dataset("barcodes", data=genes["genes"].values.astype("S"))
-            group.create_dataset("data", data=matrix.data)
-            group.create_dataset("indices", data=matrix.indices)
-            group.create_dataset("indptr", data=matrix.indptr)
-            group.create_dataset("shape", data=[matrix.shape[0], matrix.shape[1]])
+            write_sparse_matrix(out_file, "normalizedT", matrix=matrix,
+                                    barcodes=self.features, features=self.barcodes)
 
         return True
+
+def write_sparse_matrix(f, key, matrix, barcodes, features, feature_type=None):
+    """Write sparse matrix a` la BioTuring format"""
+
+    group = f.create_group(key)
+    write_array(group, "data", matrix.data)
+    write_array(group, "indices", matrix.indices)
+    write_array(group, "indptr", matrix.indptr)
+    write_list(group, "barcodes", barcodes)
+    write_list(group, "features", features)
+    write_list(group, "shape", [matrix.shape[0], matrix.shape[1]])
+    if feature_type:
+        write_list(group, "feature_type", feature_type)
+
+def write_array(f, key, value):
+    if value.dtype.kind in {"U", "O"}:
+        value = value.astype(h5py.special_dtype(vlen=str))
+    f.create_dataset(key, data=value)
+
+def write_list(f, key, value):
+    write_array(f, key, np.array(value))
