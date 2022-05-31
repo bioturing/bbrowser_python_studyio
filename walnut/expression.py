@@ -4,6 +4,8 @@ import h5py
 import pandas as pd
 import numpy as np
 from scipy import sparse
+import scanpy as sc
+import anndata
 from walnut.models import ExpressionData
 from walnut import constants
 
@@ -59,7 +61,7 @@ class Expression:
 
 
     @property
-    def features(self) -> List[str]:
+    def features(self) -> Union[List[str], None]:
         if not self.__expression_data:
             self.__read_expression_data()
 
@@ -70,7 +72,7 @@ class Expression:
 
 
     @property
-    def barcodes(self) -> List[str]:
+    def barcodes(self) -> Union[List[str], None]:
         if not self.__expression_data:
             self.__read_expression_data()
 
@@ -81,7 +83,7 @@ class Expression:
 
 
     @property
-    def feature_type(self) -> List[Literal[constants.FEATURE_TYPES]]:
+    def feature_type(self) -> Union[List[Literal[constants.FEATURE_TYPES]], None]:
         if not self.__expression_data:
             self.__read_expression_data()
 
@@ -123,8 +125,6 @@ class Expression:
 
     @staticmethod
     def normalize_expression(raw_matrix: sparse.csc_matrix) -> sparse.csc_matrix:
-        import scanpy as sc
-        import anndata
         adata = anndata.AnnData(raw_matrix)
         sc.pp.normalize_total(adata, target_sum=1e4)
         return adata.X
@@ -163,36 +163,35 @@ class Expression:
         matrix = self.raw_matrix
         with h5py.File(self.path, "w") as out_file:
             write_sparse_matrix(out_file, "bioturing", matrix=matrix, barcodes=self.barcodes,
-                                    features=self.features, feature_type=self.feature_type)
+                                    features=self.features, feature_type=self.feature_type,
+                                    chunks=(min(10000, len(matrix.data)), ))
 
             colsum = out_file.create_group("colsum")
-            colsum.create_dataset("raw", data=np.array(matrix.sum(axis=0))[0])
+            write_array(colsum, "raw", np.array(matrix.sum(axis=0))[0])
 
             matrix = matrix.transpose().tocsc() # Sparse matrix have to be csc (legacy)
             write_sparse_matrix(out_file, key="countsT", matrix=matrix, barcodes=self.features,
-                                    features=self.barcodes)
+                                    features=self.barcodes, chunks=(min(10000, len(matrix.data)), ))
 
             # log2 of just non-zeros
             matrix.data = np.log2(matrix.data + 1)
 
             # Sum of rows for transposed mat
-            colsum.create_dataset("log", data=np.array(matrix.sum(axis=1).reshape(-1))[0])
-
+            write_array(colsum, "log", np.array(matrix.sum(axis=1).reshape(-1))[0])
             norm_matrix = self.norm_matrix
-            colsum.create_dataset("lognorm", data=np.array(norm_matrix.sum(axis=0))[0])
-
+            write_array(colsum, "lognorm", np.array(norm_matrix.sum(axis=0))[0])
             matrix = norm_matrix.transpose().tocsc() # Sparse matrix have to be csc (legacy)
-            write_sparse_matrix(out_file, "normalizedT", matrix=matrix,
-                                    barcodes=self.features, features=self.barcodes)
+            write_sparse_matrix(out_file, "normalizedT", matrix=matrix, barcodes=self.features,
+                                    features=self.barcodes, chunks=(min(10000, len(matrix.data)), ))
 
         return True
 
-def write_sparse_matrix(f, key, matrix, barcodes, features, feature_type=None):
+def write_sparse_matrix(f, key, matrix, barcodes, features, feature_type=None, **kwargs):
     """Write sparse matrix a` la BioTuring format"""
 
     group = f.create_group(key)
-    write_array(group, "data", matrix.data)
-    write_array(group, "indices", matrix.indices)
+    write_array(group, "data", matrix.data, **kwargs)
+    write_array(group, "indices", matrix.indices, **kwargs)
     write_array(group, "indptr", matrix.indptr)
     write_list(group, "barcodes", barcodes)
     write_list(group, "features", features)
@@ -200,11 +199,11 @@ def write_sparse_matrix(f, key, matrix, barcodes, features, feature_type=None):
     if feature_type:
         write_list(group, "feature_type", feature_type)
 
-def write_array(f, key, value):
+def write_array(f, key, value, **kwargs):
     if value.dtype.kind in {"U", "O"}:
         # A` la anndata, will fail with compound dtypes
         value = value.astype(h5py.special_dtype(vlen=str))
-    f.create_dataset(key, data=value)
+    f.create_dataset(key, data=value, **kwargs)
 
-def write_list(f, key, value):
-    write_array(f, key, np.array(value))
+def write_list(f, key, value, **kwargs):
+    write_array(f, key, np.array(value), **kwargs)
