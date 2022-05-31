@@ -6,6 +6,8 @@ except:
 
 NUM = Union[int, float]
 
+LENSID = Union[int, str]
+
 SPECIES_LIST = Literal["human", "mouse", "rat", "zebrafish", "fly",
                         "m_fascicularis", "other"]
 OMICS_LIST = Literal["RNA", "ADT", "PRTB", "spatial"]
@@ -25,3 +27,6 @@ UNASSIGNED = "Unassigned"
 METADATA_TYPE_NUMERIC = "numeric"
 METADATA_TYPE_CATEGORICAL = "category"
 BIOTURING_UNASSIGNED = "Unassigned"
+
+LENS_MODE = Literal["PRIVATE", "PUBLIC"]
+LENS_IMAGE_TYPE = Literal["truecolor", "multiplex"]
