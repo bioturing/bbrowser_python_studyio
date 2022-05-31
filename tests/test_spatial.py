@@ -1,7 +1,7 @@
+# type: ignore
+
 import unittest
 import tempfile
-
-from pydantic import ValidationError
 
 class TestSpatial(unittest.TestCase):
     def __init__(self, methodName="runTest"):
