@@ -1,6 +1,7 @@
 import time
 from uuid import uuid4
-from typing import Collection, List, Dict, Any, TypeVar, Generic, Type
+from typing import Collection, List, Dict, Any, TypeVar, Generic, Type, Union
+from scipy import sparse
 import numpy
 from abc import ABC, abstractmethod
 import os
@@ -109,7 +110,7 @@ def make_unique(x: List[str]) -> List[str]:
 def get_density(mtx: Union[sparse.csc_matrix, sparse.csr_matrix]) -> float:
     return mtx.nnz / mtx.shape[0] / mtx.shape[1]
 
-def is_dense(mtx: Union[sparse.csc_matrix, sparse.csr_matrix], threshold: int=2/3) -> bool:
+def is_dense(mtx: Union[sparse.csc_matrix, sparse.csr_matrix], threshold: float=2/3) -> bool:
     """
     Determine if a matrix is dense or sparse based on `threshold`
     2/3 is ad-hoc value

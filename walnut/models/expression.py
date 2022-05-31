@@ -4,26 +4,21 @@ from walnut import constants
 from scipy import sparse
 
 class ExpressionData(BaseModel):
-    raw_matrix: Union[sparse.csc_matrix, sparse.csr_matrix]
-    norm_matrix: Union[sparse.csc_matrix, sparse.csr_matrix]
+    raw_matrix: sparse.csc_matrix
+    norm_matrix: sparse.csc_matrix
     barcodes: List[str]
     features: List[str]
-    feature_type: List[Literal[constants.FEATURE_TYPES]]
+    feature_type: List[constants.FEATURE_TYPES]
 
     class Config:
         arbitrary_types_allowed=True
 
 
     @validator("raw_matrix", pre=False)
-    def check_raw(cls, v):
+    def check_raw(cls, v) -> sparse.csc_matrix:
         if v.min() < 0:
             raise ValueError("Raw count matrix with negative values are not supported")
-        return v.tocsc()
-
-    @validator("norm_matrix", pre=False)
-    def check_norm(cls, v):
-        return v.tocsc()
-
+        return v
 
     @root_validator(pre=False, skip_on_failure=True)
     def check_barcode_feature(cls, values):

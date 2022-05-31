@@ -29,7 +29,7 @@ class StudyStructure:
         self.gene_db = os.path.join(self.main_dir, "gene")
 
 class Study:
-    def __init__(self, study_folder, species: constants.SPECIES_LIST=None, reader: Reader = TextReader()):
+    def __init__(self, study_folder, species: Union[constants.SPECIES_LIST, None]=None, reader: Reader = TextReader()):
         self.__location = StudyStructure(study_folder)
         self.metadata = Metadata(self.__location.metadata, reader)
         self.expression = Expression(self.__location.h5matrix)

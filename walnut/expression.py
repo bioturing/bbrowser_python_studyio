@@ -1,4 +1,4 @@
-from typing import Union, List, Literal, Tuple
+from typing import Union, List, Literal, Tuple, get_args, Any
 import os
 import h5py
 import pandas as pd
@@ -23,20 +23,35 @@ class SparseExpression(SparseDataset):
     @property
     def shape(self) -> Tuple[int, int]:
         shape = self.group["shape"]
-        return tuple(shape)
+        return tuple(shape)  # type: ignore
 
 class Expression:
     def __init__(self, h5path):
         self.path = h5path
         self.__expression_data = None
 
-    def read_expression_data(self):
+    def read_expression_data(self) -> None:
         """
         Load all data from matrix.hdf5
         """
         if not self.exists:
             print("WARNING: No matrix.hdf5 found. This study has not been written yet")
-            return None
+            return
+
+        if self.raw_matrix is None:
+            return
+        
+        if self.norm_matrix is None:
+            return
+        
+        if self.barcodes is None:
+            return
+        
+        if self.features is None:
+            return
+        
+        if self.feature_type is None:
+            return
 
         self.__expression_data = ExpressionData(raw_matrix=self.raw_matrix,
                                                 norm_matrix=self.norm_matrix,
@@ -60,8 +75,8 @@ class Expression:
             return None
 
         with h5py.File(self.path, "r") as fopen:
-            features = [x.decode() for x in fopen["bioturing/features"][:]]
-        return features
+            features = self.get_1d_dataset(fopen, "bioturing/features")
+            return [x.decode() for x in features]
 
 
     @property
@@ -74,9 +89,8 @@ class Expression:
             return None
 
         with h5py.File(self.path, "r") as fopen:
-            barcodes = [x.decode() for x in fopen["bioturing/barcodes"][:]]
-        return barcodes
-
+            barcodes = self.get_1d_dataset(fopen, "bioturing/barcodes")
+            return [x.decode() for x in barcodes]
 
     @property
     def feature_type(self) -> Union[List[Literal[constants.FEATURE_TYPES]], None]:
@@ -88,11 +102,18 @@ class Expression:
             return None
 
         with h5py.File(self.path, "r") as fopen:
-            if "feature_type" in fopen["bioturing"].keys(): # Old study does not have feature_type
-                feature_type = [x.decode() for x in fopen["bioturing/feature_type"][:].flatten()] # Tolerate weird shape of feature_type
+            h5bioturing = fopen["bioturing"]
+
+            if not isinstance(h5bioturing, h5py.Group):
+                return None
+
+            if "feature_type" in h5bioturing.keys(): # Old study does not have feature_type
+                feature_type = self.get_1d_dataset(fopen, "bioturing/feature_type")
+                feature_type = [x.decode() for x in feature_type] # Tolerate weird shape of feature_type
             else :
                 print("WARNING: This study does not contain info for feature type")
-                features = [x.decode() for x in fopen["bioturing/features"][:]]
+                features = self.get_1d_dataset(fopen, "bioturing/features")
+                features = [x.decode() for x in features]
                 feature_type = [self.detect_feature_type(x) for x in features]
         return feature_type
 
@@ -106,10 +127,10 @@ class Expression:
             return None
 
         with h5py.File(self.path, "r") as fopen:
-            data = fopen["bioturing/data"][:]
-            i = fopen["bioturing/indices"][:]
-            p = fopen["bioturing/indptr"][:]
-            shape = fopen["bioturing/shape"][:]
+            data = self.get_1d_dataset(fopen, "bioturing/data")
+            i = self.get_1d_dataset(fopen, "bioturing/indices")
+            p = self.get_1d_dataset(fopen, "bioturing/indptr")
+            shape = self.get_1d_dataset(fopen, "bioturing/shape")
 
         return sparse.csc_matrix(
                 (data, i, p),
@@ -127,10 +148,10 @@ class Expression:
             return None
 
         with h5py.File(self.path, "r") as fopen:
-            data = fopen["normalizedT/data"][:]
-            i = fopen["normalizedT/indices"][:]
-            p = fopen["normalizedT/indptr"][:]
-            shape = fopen["normalizedT/shape"][:]
+            data = self.get_1d_dataset(fopen, "normalizedT/data")
+            i = self.get_1d_dataset(fopen, "normalizedT/indices")
+            p = self.get_1d_dataset(fopen, "normalizedT/indptr")
+            shape = self.get_1d_dataset(fopen, "normalizedT/shape")
 
         return sparse.csc_matrix(
                 (data, i, p),
@@ -139,10 +160,10 @@ class Expression:
 
 
     @staticmethod
-    def detect_feature_type(feature: str) -> Literal[constants.FEATURE_TYPES]:
+    def detect_feature_type(feature: str) -> constants.FEATURE_TYPES:
         prefix = feature.split("-")[0]
-        if prefix in constants.FEATURE_TYPES:
-            return prefix
+        if prefix in get_args(constants.FEATURE_TYPES):
+            return prefix  # type: ignore
         return "RNA"
 
 
@@ -150,29 +171,40 @@ class Expression:
     def normalize_expression(raw_matrix: sparse.csc_matrix) -> sparse.csc_matrix:
         adata = anndata.AnnData(raw_matrix)
         sc.pp.normalize_total(adata, target_sum=1e4)
-        return adata.X
+        return adata.X  # type: ignore
+
+    def get_1d_dataset(self, fopen, group) -> List[Any]:
+        h5data = fopen[group]
+        if not isinstance(h5data, h5py.Dataset):
+            raise Exception('%s does not exist' % group)
+        return h5data[:].flatten()
 
     def add_expression_data(self, raw_matrix: Union[sparse.csc_matrix, sparse.csr_matrix],
                             barcodes: List[str],
                             features: List[str],
-                            norm_matrix: Union[sparse.csc_matrix, sparse.csr_matrix]=None,
-                            feature_type: List[str]=None):
+                            norm_matrix: Union[sparse.csc_matrix, sparse.csr_matrix, None]=None,
+                            feature_type: Union[List[constants.FEATURE_TYPES], None]=None):
         if self.exists:
             print("WARNING: This study already exists, cannot add expression data")
             return None
         if not len(set(features)) == len(features):
             raise ValueError("Please make sure `features` contains no duplicates")
 
+        raw = raw_matrix.tocsc()
+
         if norm_matrix is None:
-            norm_matrix = self.normalize_expression(raw_matrix)
+            norm = self.normalize_expression(raw)
+        else:
+            norm = norm_matrix.tocsc()
+
         if feature_type is None:
             feature_type = [self.detect_feature_type(x) for x in features]
 
-        self.__expression_data = ExpressionData(raw_matrix=raw_matrix,
-                                                norm_matrix=norm_matrix,
+        self.__expression_data = ExpressionData(raw_matrix = raw,
+                                                norm_matrix = norm,
                                                 barcodes = barcodes,
                                                 features = features,
-                                                feature_type=feature_type)
+                                                feature_type = feature_type)
 
 
     def write(self) -> bool:
@@ -181,6 +213,13 @@ class Expression:
             return False
         if self.exists:
             print("WARNING: matrix.hdf5 has been written, cannot overwrite")
+            return False
+
+
+        if self.raw_matrix is None:
+            return False
+        
+        if self.norm_matrix is None:
             return False
 
         matrix = self.raw_matrix
