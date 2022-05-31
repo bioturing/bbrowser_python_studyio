@@ -15,7 +15,7 @@ def test_gene_db_conversion():
 
 def test_gene_db_creation():
     study_folder = tempfile.mkdtemp()
-    study = Study(study_folder)
+    study = Study(study_folder, 'human')
     study.gene_db.create(["CD3D", "CD79A", "TRILE", "CCL5", "EPCAM"])
     study.gene_db.read()
     df = study.gene_db.to_df()
@@ -25,7 +25,7 @@ def test_gene_db_creation():
     assert db.is_id(df["gene_id"].tolist())
 
 
-def test_gene_db_creation_with_dup():
+def test_gene_db_creation_large_data():
     # Prepare data
     
     gene_db = GeneDB(os.path.join(common.get_pkg_data(), 'db'), "human")
@@ -34,7 +34,7 @@ def test_gene_db_creation_with_dup():
     features = df['gene_id'][0:10000]
 
     study_folder = tempfile.mkdtemp()
-    study = Study(study_folder)
+    study = Study(study_folder, 'human')
     study.gene_db.create(features.tolist())
     study.gene_db.read()
     df = study.gene_db.to_df()

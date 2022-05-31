@@ -1,22 +1,19 @@
 import pydantic
-import sys
 import os
 import json
 import tempfile
-from fastapi.testclient import TestClient
 from walnut.dimred import  Dimred
 from walnut.dimred import SingleDimred
 from walnut.readers import TextReader
+from walnut.study import Study
+import pandas as pd
+import numpy as np
 
 # %%
 
 def test_add_dimred():
-    from walnut.study import Study
-    import pandas as pd
-    import numpy as np
-
     study_folder = tempfile.mkdtemp()
-    study = Study(study_folder)
+    study = Study(study_folder, species="human")
     print(study.dimred)
     coords = [[-2, -4], [12, -22], [-12, 37]]
     name ='new dimred'

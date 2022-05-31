@@ -20,6 +20,7 @@ INPUT_FORMAT_LIST = Literal["fullmatrix", "mtx", "h5matrix",
 NORMALIZATION_LIST = Literal["none", "lognorm"]
 
 METADATA_TYPE_LIST = Literal["category", "numeric"]
+FEATURE_TYPES = Literal["RNA", "ADT", "PRTB"]
 UNASSIGNED = "Unassigned"
 METADATA_TYPE_NUMERIC = "numeric"
 METADATA_TYPE_CATEGORICAL = "category"

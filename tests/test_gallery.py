@@ -5,7 +5,7 @@ import os
 def test_create_gene_collection():
     from walnut.study import Study
     study_folder = tempfile.mkdtemp()
-    study = Study(study_folder)
+    study = Study(study_folder, 'human')
 
     # Test initializing from json
     imm_id = study.create_gene_collection("immune", ["CD3D", "NKG7", "CD79A"])
