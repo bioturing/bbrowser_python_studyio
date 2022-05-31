@@ -1,4 +1,4 @@
-from typing import Union, List, Literal
+from typing import Union, List, Literal, Tuple
 import os
 import h5py
 import pandas as pd
@@ -8,51 +8,41 @@ import scanpy as sc
 import anndata
 from walnut.models import ExpressionData
 from walnut import constants
+from anndata._core.sparse_dataset import SparseDataset
+
+class SparseExpression(SparseDataset):
+    """
+    Interface for on-disk sparse matrix from AnnData
+    Not used yet. Might be useful for big study.
+    """
+
+    @property
+    def format_str(self) -> str:
+        return "csc"
+
+    @property
+    def shape(self) -> Tuple[int, int]:
+        shape = self.group["shape"]
+        return tuple(shape)
 
 class Expression:
     def __init__(self, h5path):
         self.path = h5path
         self.__expression_data = None
 
-    def __read_expression_data(self):
+    def read_expression_data(self):
+        """
+        Load all data from matrix.hdf5
+        """
         if not self.exists:
             print("WARNING: No matrix.hdf5 found. This study has not been written yet")
             return None
 
-        with h5py.File(self.path, "r") as fopen:
-            data = fopen["bioturing/data"][:]
-            i = fopen["bioturing/indices"][:]
-            p = fopen["bioturing/indptr"][:]
-            shape = fopen["bioturing/shape"][:]
-            barcodes = [x.decode() for x in fopen["bioturing/barcodes"][:]]
-            features = [x.decode() for x in fopen["bioturing/features"][:]]
-
-            if "feature_type" in fopen["bioturing"].keys(): # Old study does not have feature_type
-                feature_type = [x.decode() for x in fopen["bioturing/feature_type"][:].flatten()] # Tolerate weird shape of feature_type
-            else :
-                print("WARNING: This study does not contain info for feature type")
-                feature_type = [self.detect_feature_type(x) for x in features]
-
-        raw_matrix = sparse.csc_matrix(
-                (data, i, p),
-                shape=shape
-            )
-
-        with h5py.File(self.path, "r") as fopen:
-            data = fopen["normalizedT/data"][:]
-            i = fopen["normalizedT/indices"][:]
-            p = fopen["normalizedT/indptr"][:]
-            shape = fopen["normalizedT/shape"][:]
-
-        norm_matrix = sparse.csc_matrix(
-                (data, i, p),
-                shape=shape
-            ).T.tocsc()
-        self.__expression_data = ExpressionData(raw_matrix=raw_matrix,
-                                                norm_matrix=norm_matrix,
-                                                barcodes = barcodes,
-                                                features = features,
-                                                feature_type=feature_type)
+        self.__expression_data = ExpressionData(raw_matrix=self.raw_matrix,
+                                                norm_matrix=self.norm_matrix,
+                                                barcodes = self.barcodes,
+                                                features = self.features,
+                                                feature_type=self.feature_type)
 
 
     @property
@@ -62,57 +52,90 @@ class Expression:
 
     @property
     def features(self) -> Union[List[str], None]:
-        if not self.__expression_data:
-            self.__read_expression_data()
+        if self.__expression_data:
+            return self.__expression_data.features
 
-        if not self.__expression_data:
+        if not self.exists:
+            print("WARNING: No matrix.hdf5 found. This study has not been written yet")
             return None
 
-        return self.__expression_data.features
+        with h5py.File(self.path, "r") as fopen:
+            features = [x.decode() for x in fopen["bioturing/features"][:]]
+        return features
 
 
     @property
     def barcodes(self) -> Union[List[str], None]:
-        if not self.__expression_data:
-            self.__read_expression_data()
+        if self.__expression_data:
+            return self.__expression_data.barcodes
 
-        if not self.__expression_data:
+        if not self.exists:
+            print("WARNING: No matrix.hdf5 found. This study has not been written yet")
             return None
 
-        return self.__expression_data.barcodes
+        with h5py.File(self.path, "r") as fopen:
+            barcodes = [x.decode() for x in fopen["bioturing/barcodes"][:]]
+        return barcodes
 
 
     @property
     def feature_type(self) -> Union[List[Literal[constants.FEATURE_TYPES]], None]:
-        if not self.__expression_data:
-            self.__read_expression_data()
+        if self.__expression_data:
+            return self.__expression_data.feature_type
 
-        if not self.__expression_data:
+        if not self.exists:
+            print("WARNING: No matrix.hdf5 found. This study has not been written yet")
             return None
 
-        return self.__expression_data.feature_type
+        with h5py.File(self.path, "r") as fopen:
+            if "feature_type" in fopen["bioturing"].keys(): # Old study does not have feature_type
+                feature_type = [x.decode() for x in fopen["bioturing/feature_type"][:].flatten()] # Tolerate weird shape of feature_type
+            else :
+                print("WARNING: This study does not contain info for feature type")
+                features = [x.decode() for x in fopen["bioturing/features"][:]]
+                feature_type = [self.detect_feature_type(x) for x in features]
+        return feature_type
+
+    @property
+    def raw_matrix(self) -> Union[sparse.csc_matrix, None]:
+        if self.__expression_data:
+            return self.__expression_data.raw_matrix
+
+        if not self.exists:
+            print("WARNING: No matrix.hdf5 found. This study has not been written yet")
+            return None
+
+        with h5py.File(self.path, "r") as fopen:
+            data = fopen["bioturing/data"][:]
+            i = fopen["bioturing/indices"][:]
+            p = fopen["bioturing/indptr"][:]
+            shape = fopen["bioturing/shape"][:]
+
+        return sparse.csc_matrix(
+                (data, i, p),
+                shape=shape
+            )
 
 
     @property
-    def raw_matrix(self) -> sparse.csc_matrix:
-        if not self.__expression_data:
-            self.__read_expression_data()
+    def norm_matrix(self) -> Union[sparse.csc_matrix, None]:
+        if self.__expression_data:
+            return self.__expression_data.norm_matrix
 
-        if not self.__expression_data:
+        if not self.exists:
+            print("WARNING: No matrix.hdf5 found. This study has not been written yet")
             return None
 
-        return self.__expression_data.raw_matrix
+        with h5py.File(self.path, "r") as fopen:
+            data = fopen["normalizedT/data"][:]
+            i = fopen["normalizedT/indices"][:]
+            p = fopen["normalizedT/indptr"][:]
+            shape = fopen["normalizedT/shape"][:]
 
-
-    @property
-    def norm_matrix(self) -> sparse.csc_matrix:
-        if not self.__expression_data:
-            self.__read_expression_data()
-
-        if not self.__expression_data:
-            return None
-
-        return self.__expression_data.norm_matrix
+        return sparse.csc_matrix(
+                (data, i, p),
+                shape=shape
+            ).T.tocsc()
 
 
     @staticmethod

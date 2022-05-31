@@ -48,7 +48,7 @@ class JSONFile(FileIO[dict]):
 
     def write(self, obj: dict):
         json_str = json.dumps(obj)
-        self.__file.write(json_str)        
+        self.__file.write(json_str)
 
 class FuzzyDict(dict):
     """A dictionary where value can be obtained with multiple keys"""
@@ -89,7 +89,7 @@ def is_number(x) -> bool:
 
 def get_pkg_data():
     return os.path.join(os.path.dirname(constants.__file__), "data")
-    
+
 def exc_to_str(e):
     return "%s: %s" % (e.__class__.__name__, str(e))
 
@@ -104,4 +104,14 @@ def make_unique(x: List[str]) -> List[str]:
             x[i] = '%s_%s' % (val, count)
         else:
             memo[val] = 1
-    return x 
+    return x
+
+def get_density(mtx: Union[sparse.csc_matrix, sparse.csr_matrix]) -> float:
+    return mtx.nnz / mtx.shape[0] / mtx.shape[1]
+
+def is_dense(mtx: Union[sparse.csc_matrix, sparse.csr_matrix], threshold: int=2/3) -> bool:
+    """
+    Determine if a matrix is dense or sparse based on `threshold`
+    2/3 is ad-hoc value
+    """
+    return get_density(mtx) > threshold
