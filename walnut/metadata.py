@@ -220,7 +220,8 @@ class Metadata:
         if content.type == constants.METADATA_TYPE_NUMERIC:
             assert isinstance(float(value), float)
             for idx in indices:
-                content.clusters[idx] = float(value)
+                content.clusters[idx] = float(value) # type: ignore
+                # FIXME: creates a model for each metadata type
 
         # Update categories at category id
         filter_content = filter_cluster(count_cluster_length(content))
