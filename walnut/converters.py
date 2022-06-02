@@ -2,7 +2,7 @@ from typing import TypeVar, Generic, Any
 from abc import ABC, abstractmethod
 import json
 
-from walnut.models import Category, Metalist, GeneCollections, RunInfo, CategoryMeta, MetaDimred, SingleDimred, SpatialInfo, LensImageInfo
+from walnut.models import *
 from walnut import common
 
 OUT_TYPE = TypeVar("OUT_TYPE")
@@ -134,4 +134,13 @@ class IOLens(IOConverter[LensImageInfo]):
 
     @staticmethod
     def to_str(content: LensImageInfo) -> str:
+        return content.json()
+
+class IOGraphClusterDetail(IOConverter[GraphClusterDetail]):
+    @staticmethod
+    def from_str(s: str) -> GraphClusterDetail:
+        return GraphClusterDetail.parse_obj(json.loads(s))
+
+    @staticmethod
+    def to_str(content: GraphClusterDetail) -> str:
         return content.json()

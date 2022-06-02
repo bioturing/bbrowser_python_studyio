@@ -11,6 +11,7 @@ from walnut.gene_db import StudyGeneDB
 from walnut.common import create_uuid
 from walnut import constants
 from scipy import sparse
+from walnut.FileIO import FileIO
 import numpy as np
 import pandas as pd
 
@@ -27,6 +28,7 @@ class StudyStructure:
         self.dimred = os.path.join(self.main_dir, "dimred")
         self.h5matrix = os.path.join(self.path, "main", "matrix.hdf5")
         self.gene_db = os.path.join(self.main_dir, "gene")
+        self.sub = os.path.join(self.path, "sub")
 
 class Study:
     def __init__(self, study_folder, species: Union[constants.SPECIES_LIST, None]=None, reader: Reader = TextReader()):

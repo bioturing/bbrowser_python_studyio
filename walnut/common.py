@@ -69,11 +69,10 @@ def get_timestamp():
 def create_uuid():
     return str(uuid4()).replace("-", "")
 
-def create_history() -> History:
-    return History(created_by="walnut", created_at=time.time(),
+def create_history(creator="walnut", description="Created automatically") -> History:
+    return History(created_by=creator, created_at=time.time(),
                     hash_id=create_uuid(),
-                    description="Created automatically")  # type: ignore
-
+                    description=description)
 
 def find_indices_in_list(needles: Collection, haystack: Collection) -> List[int]:
     if len(numpy.unique(list(haystack))) != len(haystack):
