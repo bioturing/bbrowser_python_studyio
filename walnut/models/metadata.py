@@ -150,7 +150,3 @@ class GraphClusterInfo(BaseModel):
 class GraphClusterDetail(GraphClusterInfo):
     img: str
     selectedArr: List[int]
-    
-class GraphCluster(BaseModel):
-    content: List[GraphClusterInfo]
-    version: int
