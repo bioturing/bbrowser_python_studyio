@@ -1,5 +1,5 @@
 import os
-from typing import List, Optional, Union
+from typing import List, Optional, Union, Collection
 from walnut.readers import Reader
 from walnut.metadata import Metadata
 from walnut.dimred import Dimred
@@ -118,10 +118,17 @@ class Study:
                                      'id': id,
                                      'coords': coords_list,
                                      'size': size
-                                    })
+                                    })   # type: ignore
         self.dimred.write()
 
         return dimred_id
 
     def remove_dimred(self, dimred_id: str):
         return self.dimred.remove(dimred_id)
+
+    def add_metadata(self, name: str, value: Collection) -> str:
+        meta_id = self.metadata.add_category(name, value)
+        self.metadata.write_content_by_id(meta_id)
+        self.metadata.write_metalist()
+
+        return meta_id
