@@ -56,12 +56,12 @@ class Metadata:
 
     def write_metalist(self) -> None:
         self.__get_metalist_io().write(self.__metalist)
-    
+
     def write_content_by_id(self, id) -> None:
         self.__get_category_io(id).write(self.__categories[id])
 
     def write_all(self) -> None:
-        self.write_metalist
+        self.write_metalist()
         for category_id in self.__categories:
             self.write_content_by_id(category_id)
 
@@ -93,7 +93,7 @@ class Metadata:
         for column_name in category_data:
             self.add_category(column_name, list(category_data[column_name]))
 
-    def add_category(self, name: str, category_data: Collection):
+    def add_category(self, name: str, category_data: Collection) -> str:
         if len(self.__categories) > 0 \
                 and len(category_data) != len(list(self.__categories.values())[0].clusters):
             raise ValueError("New category's length must equal existing lengths")
@@ -103,16 +103,16 @@ class Metadata:
         except ValueError:
             print("WARNING: Cannot add %s as a numerical type, treating as categorical" % name)
             is_numerical = False
-
+        category_id = common.create_uuid()
         if is_numerical:
-            category_base = CategoryBase(id=common.create_uuid(), name=name,
+            category_base = CategoryBase(id=category_id, name=name,
                                             history=[common.create_history()],
                                             type=constants.METADATA_TYPE_NUMERIC)
             new_category = Category(**category_base.dict(),
                                     clusters=list(numpy.array(category_data, dtype=float)))
         else:
             cluster_names, cluster_lengths = self.__get_cluster_names_and_lengths(category_data)
-            category_base = CategoryBase(id=common.create_uuid(), name=name,
+            category_base = CategoryBase(id=category_id, name=name,
                                             clusterName=cluster_names,
                                             clusterLength=cluster_lengths,
                                             history=[common.create_history()],
@@ -126,6 +126,7 @@ class Metadata:
         category_meta = CategoryMeta(**category_base.dict())
         self.__metalist.add_category(category_meta)
         self.__categories[category_meta.id] = new_category
+        return category_id
 
     def change_reader(self, reader: Reader) -> None:
         self.__file_reader = reader
@@ -187,7 +188,7 @@ class Metadata:
             print("WARNING: Removing category %s due to not appearing in metalist"
                     % invalid_category_id)
             self.__metalist.remove_category(invalid_category_id)
-    
+
     def get_content_by_id(self, id: str) -> Category:
         return self.__categories[id]
 
@@ -196,7 +197,7 @@ class Metadata:
         self.__categories[id] = content
         content_meta = content.__dict__.copy()
         content_meta.pop("clusters")
-        
+
         # Update CategoryBase
         self.__metalist.content[id] = CategoryMeta.parse_obj(content_meta)
 
