@@ -1,11 +1,12 @@
 [tool.poetry]
 name = "walnut"
-version = "0.1.0"
+version = "0.1.1"
 description = "Read or write a BBrowser study"
 authors = [
     "Tri Le <tri@bioturing.com>",
     "Vu Nguyen <vu@bioturing.com>",
-    "Hao Tran <hao@bioturing.com>"
+    "Hao Tran <hao@bioturing.com>",
+    "Dat Tran <dat@bioturing.com>"
 ]
 license = "LICENSE"
 readme = "README.md"
@@ -23,6 +24,8 @@ pycryptodome = "*"
 h5py = "*"
 fastapi = "*"
 requests = "*"
+scipy = "*"
+scanpy = "*"
 
 [tool.poetry.dev-dependencies]
 pytest = "*"
