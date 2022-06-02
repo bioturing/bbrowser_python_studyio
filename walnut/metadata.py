@@ -7,12 +7,11 @@ import pydantic
 from walnut.models import CategoryBase, Category, CategoryMeta, Metalist
 from walnut import common
 from walnut import constants
-from walnut.readers import Reader, EncryptedTextReader
+from walnut.readers import Reader
 from walnut.converters import IOCategory, IOMetalist
 from walnut.FileIO import FileIO
 
 def filter_cluster(content):
-    print("In filter cluster")
     if content.type == constants.METADATA_TYPE_NUMERIC:
         return content
     cluster_index = [0]*len(content.clusterName)
@@ -55,12 +54,16 @@ class Metadata:
 
         self.__purge_invalid_categories()
 
-    def write(self) -> None:
+    def write_metalist(self) -> None:
         self.__get_metalist_io().write(self.__metalist)
+    
+    def write_content_by_id(self, id) -> None:
+        self.__get_category_io(id).write(self.__categories[id])
+
+    def write_all(self) -> None:
+        self.write_metalist
         for category_id in self.__categories:
-            io = self.__get_category_io(category_id)
-            category = self.__categories[category_id]
-            io.write(category)
+            self.write_content_by_id(category_id)
 
     def to_df(self) -> pandas.DataFrame:
         df = pandas.DataFrame()
@@ -188,6 +191,19 @@ class Metadata:
     def get_content_by_id(self, id: str) -> Category:
         return self.__categories[id]
 
+    def update_metadata(self, id:str, content:Category) -> None:
+        # Update Category
+        self.__categories[id] = content
+        content_meta = content.__dict__.copy()
+        content_meta.pop("clusters")
+        
+        # Update CategoryBase
+        self.__metalist.content[id] = CategoryMeta.parse_obj(content_meta)
+
+        # Write to file
+        self.write_metalist()
+        self.write_content_by_id(id)
+
     def add_label(self, category_id: str, value: Union[str, int, float], indices: List[int]) -> None:
         content = self.__categories[category_id]
         if content.type == constants.METADATA_TYPE_CATEGORICAL:
@@ -200,6 +216,13 @@ class Metadata:
 
             for idx in indices:
                 content.clusters[idx] = anno_id
-        
-        self.__categories[category_id] = content
 
+        if content.type == constants.METADATA_TYPE_NUMERIC:
+            assert isinstance(float(value), float)
+            for idx in indices:
+                content.clusters[idx] = float(value)
+
+        # Update categories at category id
+        filter_content = filter_cluster(count_cluster_length(content))
+        filter_content.history.append(common.create_history(description="Edit metadata"))
+        self.update_metadata(category_id, filter_content)

@@ -69,10 +69,10 @@ def get_timestamp():
 def create_uuid():
     return str(uuid4()).replace("-", "")
 
-def create_history() -> History:
-    return History(created_by="walnut", created_at=time.time(),
+def create_history(creator="walnut", description="Created automatically") -> History:
+    return History(created_by=creator, created_at=time.time(),
                     hash_id=create_uuid(),
-                    description="Created automatically")  # type: ignore
+                    description=description)
 
 def find_indices_in_list(needles: Collection, haystack: Collection) -> List[int]:
     if len(numpy.unique(list(haystack))) != len(haystack):
@@ -89,7 +89,6 @@ def is_number(x) -> bool:
 
 def get_pkg_data():
     return os.path.join(os.path.dirname(constants.__file__), "data")
-<<<<<<< HEAD
 
 def exc_to_str(e):
     return "%s: %s" % (e.__class__.__name__, str(e))
@@ -116,5 +115,3 @@ def is_dense(mtx: Union[sparse.csc_matrix, sparse.csr_matrix], threshold: float=
     2/3 is ad-hoc value
     """
     return get_density(mtx) > threshold
-=======
->>>>>>> 94ce51f (unit test)
