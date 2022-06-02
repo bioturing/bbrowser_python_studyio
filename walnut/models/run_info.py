@@ -22,7 +22,7 @@ class FilterSetting(BaseModel):
       if not isinstance(v, list) or len(v) < 2:
         print("WARNING: Invalid FilterSetting found", v)
         return (0,0) # Fix gene = [0]
-      
+
       for i, item in enumerate(v):
         if isinstance(item, list):
           print("WARNING: Invalid FilterSetting found", v)
@@ -71,6 +71,12 @@ class RunInfo(BaseModel):
                 value[i] = 'spatial'
         return value
 
+    @validator("misc", pre=True)
+    def check_misc(cls, value):
+        if value is None:
+            value = {}
+        return value
+
     @validator("version", always=True)
     def set_version(cls, _):
         return 16
@@ -78,7 +84,7 @@ class RunInfo(BaseModel):
     @validator("n_batch", always=True)
     def set_n_batch(cls, _, values):
         return len(values["ana_setting"].inputType)
-    
+
     @validator("unit_settings", pre=True)
     def set_unit_settings(cls, value):
         settings = {}
