@@ -19,11 +19,11 @@ include = [ "*.db" ]
 [tool.poetry.dependencies]
 python = ">=3.6.0"
 pydantic = "*"
+typing_extensions = "*"
+sniffio = "*"
 numpy = "*"
 pycryptodome = "*"
 h5py = "*"
-fastapi = "*"
-requests = "*"
 scipy = "*"
 pandas = "*"
 scanpy = "*"
