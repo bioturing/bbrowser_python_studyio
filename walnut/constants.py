@@ -30,3 +30,5 @@ BIOTURING_UNASSIGNED = "Unassigned"
 
 LENS_MODE = Literal["PRIVATE", "PUBLIC"]
 LENS_IMAGE_TYPE = Literal["truecolor", "multiplex"]
+
+BATCH_CORRECTION = Literal["none", "harmony", "cca", "mnn"]

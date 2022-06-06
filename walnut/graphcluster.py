@@ -36,7 +36,8 @@ class GraphCluster:
         selected_arr = self.__info.selectedArr
         return list(map(lambda idx: selected_arr[idx], indices))
 
-    def get_index_array(self):
+    @property
+    def full_selected_array(self):
         """
         Return index of all cells within given subcluster_id
         Could be used to subset expression matrix
@@ -48,7 +49,7 @@ class GraphCluster:
         graph_cluster = graphcluster.GraphCluster(subcluster_id, study_structure.sub, readers.TextReader())
 
         # Get index for subcluster_id
-        idx = graph_cluster.get_index_array()
+        idx = graph_cluster.full_selected_array
         # Get expression values for given subcluster
         sub_mtx = mtx[:, idx]
         """

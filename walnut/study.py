@@ -1,5 +1,5 @@
 import os
-from typing import List, Optional, Union, Collection
+from typing import List, Optional, Union
 from walnut.readers import Reader
 from walnut.metadata import Metadata
 from walnut.dimred import Dimred
@@ -9,11 +9,12 @@ from walnut.run_info import RunInfo
 from walnut.readers import TextReader
 from walnut.gene_db import StudyGeneDB
 from walnut.common import create_uuid
-from walnut import constants
+from walnut import constants, graphcluster
 from scipy import sparse
-from walnut.FileIO import FileIO
+# from walnut.FileIO import FileIO
 import numpy as np
 import pandas as pd
+import h5py
 
 class StudyStructure:
     def __init__(self, study_folder):
@@ -27,6 +28,7 @@ class StudyStructure:
         self.metadata = os.path.join(self.path, "main", "metadata")
         self.dimred = os.path.join(self.main_dir, "dimred")
         self.h5matrix = os.path.join(self.path, "main", "matrix.hdf5")
+        self.h5pca = os.path.join(self.main_dir, "pca_result.hdf5")
         self.gene_db = os.path.join(self.main_dir, "gene")
         self.sub = os.path.join(self.path, "sub")
 
@@ -56,6 +58,9 @@ class Study:
                 raise ValueError('If you are creating a new study, please explicitly pass in `species` argument %s' % constants.SPECIES_LIST)
             self.gene_db = StudyGeneDB(self.__location.gene_db, species)
 
+    @property
+    def n_cell(self):
+        return self.run_info.n_cell
 
     def exists(self) -> bool:
         return self.run_info.exists() and self.expression.exists
@@ -126,9 +131,61 @@ class Study:
     def remove_dimred(self, dimred_id: str):
         return self.dimred.remove(dimred_id)
 
-    def add_metadata(self, name: str, value: Collection) -> str:
-        meta_id = self.metadata.add_category(name, value)
+    def add_metadata(self, name: str, value: List, subcluster_id="root", **kwargs) -> str:
+        if subcluster_id != "root":
+            graph_cluster = graphcluster.GraphCluster(subcluster_id, self.__location.sub, TextReader())
+            selected_arr = graph_cluster.full_selected_array
+
+            filled_category = [constants.BIOTURING_UNASSIGNED] * self.n_cell
+            for sub_i, main_i in enumerate(selected_arr):  # type: ignore
+                filled_category[main_i] = value[sub_i]
+
+            meta_id = self.metadata.add_category(name, filled_category, **kwargs)
+        else:
+            meta_id = self.metadata.add_category(name, value, **kwargs)
+
         self.metadata.write_content_by_id(meta_id)
         self.metadata.write_metalist()
 
         return meta_id
+
+    def get_expression(self, subcluster_id="root", type: constants.UNIT_TYPE_LIST="raw") -> np.ndarray:
+        if type == "raw":
+            mtx = self.expression.raw_matrix
+        else:
+            mtx = self.expression.norm_matrix
+
+        if mtx is None:
+            print("WARNING: No expression data found, returning empty array")
+            return np.array([])
+
+        graph_cluster = graphcluster.GraphCluster(subcluster_id, self.__location.sub, reader=TextReader())
+        idx = graph_cluster.full_selected_array
+        return mtx[:, idx]
+
+    def get_pca_result(self, subcluster_id="root", batch_correction: constants.BATCH_CORRECTION="none") -> np.ndarray:
+        """
+        Returning pca_result in cells-by-PCs matrix
+        """
+        # Creating new study_structure instance to avoid conflicting after `set_root`
+        study_structure = StudyStructure(self.__location.path)
+        study_structure.set_root(subcluster_id)
+        pca_path = study_structure.h5pca
+
+        empty_array = np.array([])
+
+        if not os.path.isfile(pca_path):
+            print("No pca_result.hdf5 found at", pca_path)
+            return empty_array
+
+        h5pca = h5py.File(pca_path)
+
+        if batch_correction == "none":
+            slot = "pca"
+        else:
+            slot = batch_correction
+
+        pca_result = h5pca.get(slot)
+        if pca_result is None:
+            return empty_array
+        return pca_result[()].T

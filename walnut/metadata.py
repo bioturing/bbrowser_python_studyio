@@ -93,16 +93,19 @@ class Metadata:
         for column_name in category_data:
             self.add_category(column_name, list(category_data[column_name]))
 
-    def add_category(self, name: str, category_data: Collection) -> str:
+    def add_category(self, name: str, category_data: Collection, try_numeric=True) -> str:
         if len(self.__categories) > 0 \
                 and len(category_data) != len(list(self.__categories.values())[0].clusters):
             raise ValueError("New category's length must equal existing lengths")
-        try:
-            numpy.array(category_data, dtype=float)
-            is_numerical = True
-        except ValueError:
-            print("WARNING: Cannot add %s as a numerical type, treating as categorical" % name)
-            is_numerical = False
+        is_numerical = False
+
+        if try_numeric:
+            try:
+                numpy.array(category_data, dtype=float)
+                is_numerical = True
+            except ValueError:
+                print("WARNING: Cannot add %s as a numerical type, treating as categorical" % name)
+
         category_id = common.create_uuid()
         if is_numerical:
             category_base = CategoryBase(id=category_id, name=name,
