@@ -4,6 +4,7 @@ import h5py
 import pandas as pd
 import numpy as np
 from scipy import sparse
+from anndata import AnnData, __version__ as anndata_version
 import scanpy as sc
 import anndata
 from walnut.models import ExpressionData

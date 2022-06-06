@@ -191,7 +191,15 @@ class Metadata:
     def get_content_by_id(self, id: str) -> Category:
         return self.__categories[id]
 
-    def update_metadata(self, id:str, content:Category) -> None:
+    def update_metadata(self, id:str, content:Category, sub_array:List[int]=[]) -> None:
+        if len(sub_array) != 0:
+            new_cluster = self.__categories[id].clusters.copy()
+            for idx, value in enumerate(content.clusters):
+                new_cluster[sub_array[idx]] = value
+        else:
+            new_cluster = content.clusters.copy()
+
+        content.clusters = new_cluster.copy()
         # Update Category
         self.__categories[id] = content
         content_meta = content.__dict__.copy()
