@@ -23,7 +23,7 @@ class GraphCluster:
         return FileIO[GraphClusterDetail](self.__get_cluster_info_path(),
                                             reader=self.__file_reader,
                                             converter=IOGraphClusterDetail)
-    
+
     def convert_to_main_cluster(self, indices:List[int]) -> List[int]:
         """
         Input:
@@ -35,3 +35,24 @@ class GraphCluster:
             return indices
         selected_arr = self.__info.selectedArr
         return list(map(lambda idx: selected_arr[idx], indices))
+
+    def get_index_array(self):
+        """
+        Return index of all cells within given subcluster_id
+        Could be used to subset expression matrix
+
+        Example:
+        mtx = study.expression.raw_matrix # Get expression matrix for entire study
+
+        study_structure = StudyStructure(study_dir)
+        graph_cluster = graphcluster.GraphCluster(subcluster_id, study_structure.sub, readers.TextReader())
+
+        # Get index for subcluster_id
+        idx = graph_cluster.get_index_array()
+        # Get expression values for given subcluster
+        sub_mtx = mtx[:, idx]
+        """
+
+        if self.__subcluster_id == 'root':
+            return slice(0, None) # Get everything
+        return self.__info.selectedArr
