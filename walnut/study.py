@@ -180,7 +180,7 @@ class Study:
 
         h5pca = h5py.File(pca_path)
 
-        if batch_correction in ["none", "harmony", "mnn"]:
+        if batch_correction == "none":
             slot = "pca"
         else:
             slot = batch_correction
