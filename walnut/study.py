@@ -187,6 +187,6 @@ class Study:
 
         pca_result = h5pca.get(slot)
         if pca_result is None:
-            print("No pca result found in slot `{slot}`")
+            print("No pca result found in `%s`" % slot)
             return empty_array
         return pca_result[()].T
