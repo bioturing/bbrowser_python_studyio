@@ -136,7 +136,7 @@ class Study:
             graph_cluster = graphcluster.GraphCluster(subcluster_id, self.__location.sub, TextReader())
             selected_arr = graph_cluster.full_selected_array
 
-            filled_category = [constants.BIOTURING_UNASSIGNED] * self.n_cell
+            filled_category = np.repeat(constants.BIOTURING_UNASSIGNED, self.n_cell)
             for sub_i, main_i in enumerate(selected_arr):  # type: ignore
                 filled_category[main_i] = value[sub_i]
 
@@ -187,5 +187,6 @@ class Study:
 
         pca_result = h5pca.get(slot)
         if pca_result is None:
+            print("No pca result found in slot `{slot}`")
             return empty_array
         return pca_result[()].T
