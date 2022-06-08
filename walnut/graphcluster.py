@@ -35,3 +35,8 @@ class GraphCluster:
             return indices
         selected_arr = self.__info.selectedArr
         return list(map(lambda idx: selected_arr[idx], indices))
+    
+    def get_selected_arr(self) -> List[int]:
+        if self.__subcluster_id == 'root':
+            return []
+        return self.__info.selectedArr
