@@ -9,7 +9,6 @@ from walnut.readers import SQLReader
 
 class GeneDB:
     def __init__(self, gene_db_dir, species):
-        print('---', gene_db_dir)
         self.__file = FileIO[pd.DataFrame](os.path.join(gene_db_dir, '%s.db' % species), SQLReader(), IOAsIs)
         self.__df = pd.DataFrame(columns=["gene_id", "name", "primary"])
 
