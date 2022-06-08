@@ -43,7 +43,9 @@ class GraphCluster:
         Could be used to subset expression matrix
 
         Example:
-        mtx = study.expression.raw_matrix # Get expression matrix for entire study
+        ```
+        # Get expression matrix for entire study
+        mtx = study.expression.raw_matrix
 
         study_structure = StudyStructure(study_dir)
         graph_cluster = graphcluster.GraphCluster(subcluster_id, study_structure.sub, readers.TextReader())
@@ -52,6 +54,7 @@ class GraphCluster:
         idx = graph_cluster.full_selected_array
         # Get expression values for given subcluster
         sub_mtx = mtx[:, idx]
+        ```
         """
 
         if self.__subcluster_id == 'root':

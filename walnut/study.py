@@ -11,7 +11,6 @@ from walnut.gene_db import StudyGeneDB
 from walnut.common import create_uuid
 from walnut import constants, graphcluster
 from scipy import sparse
-# from walnut.FileIO import FileIO
 import numpy as np
 import pandas as pd
 import h5py
