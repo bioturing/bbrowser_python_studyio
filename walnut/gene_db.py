@@ -18,7 +18,7 @@ class GeneDB:
 
     def read(self):
         if not self.exists():
-            raise Exception("No data to read")
+            raise Exception("No genedb data to read", self.__file.path)
 
         self.__df = self.__file.read()
 
@@ -63,7 +63,8 @@ class StudyGeneDB(GeneDB):
     def __init__(self, gene_db_dir, species):
         super().__init__(gene_db_dir, species)
         self.__ref = GeneDB(os.path.join(common.get_pkg_data(), 'db'), species)
-        self.__ref.read()
+        if self.__ref.exists():
+            self.__ref.read()
 
     def create(self, gene_id: List[str], gene_name: Optional[List[str]]=None):
         """

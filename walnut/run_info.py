@@ -24,7 +24,7 @@ class RunInfo():
 
     def read(self):
         if not self.exists():
-            raise Exception("No data to read")
+            raise Exception("No run_info data to read")
 
         self.__content = self.__file.read()
 
