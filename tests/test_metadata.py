@@ -117,32 +117,32 @@ def test_update_metadata():
     assert content.clusterLength == [3, 3]
 
 def test_add_metadata():
-    # Create a new metadata
     common.clear_folder(meta_folder)
     meta = Metadata(meta_folder, TextReader())
 
-    # id = meta.add_category("test", ["a", "a", "b"])
-    # cate = meta.get_content_by_id(id)
-    # assert len(cate.clusterName) == 3
-    # assert cate.type == "category"
+    # Create a new metadata
+    id = meta.add_category("test", ["a", "a", "b"])
+    cate = meta.get_content_by_id(id)
+    assert len(cate.clusterName) == 3
+    assert cate.type == "category"
 
-    # # Add a weird metadata
-    # success = True
-    # try:
-    #     meta.add_category("test2", [1, 2, 3, 4])
-    # except:
-    #     success = False
-    # assert not success
+    # Add a weird metadata
+    success = True
+    try:
+        meta.add_category("test2", [1, 2, 3, 4])
+    except:
+        success = False
+    assert not success
 
-    # # Add numeric-able metadata
-    # id = meta.add_category("test2", ["0", "1", "2"])
-    # cate = meta.get_content_by_id(id)
-    # assert cate.type == "numeric"
+    # Add numeric-able metadata
+    id = meta.add_category("test2", ["0", "1", "2"])
+    cate = meta.get_content_by_id(id)
+    assert cate.type == "numeric"
 
-    # # Add numeric-able metadata as category
-    # id = meta.add_category("test3", ["0", "1", "2"], type="category")
-    # cate = meta.get_content_by_id(id)
-    # assert cate.type == "category"
+    # Add numeric-able metadata as category
+    id = meta.add_category("test3", ["0", "1", "2"], type="category")
+    cate = meta.get_content_by_id(id)
+    assert cate.type == "category"
 
     # Sort label by clusterLength
     id = meta.add_category("test4", ["b", "a", "a"])
