@@ -12,16 +12,22 @@ class RunInfo():
             title = "Untitled study",
             n_cell = 0,
         )
-    
+
     def exists(self):
         return self.__file.exists()
 
+    @property
+    def n_cell(self):
+        if not self.exists():
+            raise Exception("Run_info has not been written, failed to get n_cell")
+        return self.__content.n_cell
+
     def read(self):
         if not self.exists():
-            raise Exception("No data to read")
+            raise Exception("No run_info data to read")
 
         self.__content = self.__file.read()
-    
+
     def get_species(self) -> constants.SPECIES_LIST:
         return self.__content.species
 

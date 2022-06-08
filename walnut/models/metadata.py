@@ -96,10 +96,10 @@ class Metalist(BaseModel):
 
     # def is_category(self, metadata) -> boolean:
     #     return metadata and metadata.type == constants.METADATA_TYPE_CATEGORICAL
-    
+
     # def is_numeric(self, metadata) -> boolean:
     #     return metadata and metadata.type == constants.METADATA_TYPE_NUMERIC
-    
+
     # def convert_to_category(self, metadata):
     #     if self.is_cell_type(metadata):
     #         metadata.clusterName = list(map(lambda x: self.cellTypes.get(x) or constants.UNASSIGNED))
@@ -148,5 +148,5 @@ class GraphClusterInfo(BaseModel):
     parent_id: str
 
 class GraphClusterDetail(GraphClusterInfo):
-    img: str
+    img: str = "null"
     selectedArr: List[int]

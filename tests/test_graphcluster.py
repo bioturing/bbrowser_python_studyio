@@ -29,3 +29,7 @@ def test_graph_cluster_v1():
     assert main_idx[0] == 3
     assert main_idx[1] == 5
     assert main_idx[2] == 7
+
+def test_get_full_index_array():
+    # TODO: Implement after writing study with subcluster
+    pass

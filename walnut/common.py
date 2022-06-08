@@ -9,6 +9,7 @@ import json
 from walnut.models import History
 from typing import Type, TypeVar, Generic
 from walnut import constants
+import shutil
 
 FileContent = TypeVar("FileContent")
 
@@ -115,3 +116,9 @@ def is_dense(mtx: Union[sparse.csc_matrix, sparse.csr_matrix], threshold: float=
     2/3 is ad-hoc value
     """
     return get_density(mtx) > threshold
+
+def clear_folder(x: str):
+    """Ensures a folder exists and empty"""
+    if os.path.isdir(x):
+        shutil.rmtree(x)
+    os.makedirs(x)

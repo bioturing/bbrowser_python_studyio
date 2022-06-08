@@ -1,5 +1,5 @@
 import os
-from typing import List, Dict, Collection, Tuple, Union
+from typing import List, Dict, Collection, Tuple, Union, Literal
 import pydantic
 import pandas
 import numpy
@@ -56,12 +56,12 @@ class Metadata:
 
     def write_metalist(self) -> None:
         self.__get_metalist_io().write(self.__metalist)
-    
+
     def write_content_by_id(self, id) -> None:
         self.__get_category_io(id).write(self.__categories[id])
 
     def write_all(self) -> None:
-        self.write_metalist
+        self.write_metalist()
         for category_id in self.__categories:
             self.write_content_by_id(category_id)
 
@@ -93,26 +93,37 @@ class Metadata:
         for column_name in category_data:
             self.add_category(column_name, list(category_data[column_name]))
 
-    def add_category(self, name: str, category_data: Collection):
-        if len(self.__categories) > 0 \
-                and len(category_data) != len(list(self.__categories.values())[0].clusters):
-            raise ValueError("New category's length must equal existing lengths")
-        try:
-            numpy.array(category_data, dtype=float)
-            is_numerical = True
-        except ValueError:
-            print("WARNING: Cannot add %s as a numerical type, treating as categorical" % name)
-            is_numerical = False
+    def add_category(self, name: str, category_data: Collection, type: Literal["auto", "category", "numeric"]="auto", sort: bool=True) -> str:
+        """
+        Add a metadata
 
+        Create a new metadata in an existing metadata
+        """
+
+        if len(self.__categories) > 0:
+            # If at least a metadata exists, validates the size of the new metadata
+            assert len(category_data) == len(list(self.__categories.values())[0].clusters), \
+                    "New category's length must equal existing lengths"
+
+        is_numerical = False
+        if type == "auto" or type == "numeric":
+            try:
+                category_data = numpy.array(category_data, dtype=float)
+                is_numerical = True
+            except Exception as e:
+                if type == "numeric":
+                    raise e
+                print("WARNING: Cannot add %s as a numerical type, treating as categorical" % name)
+
+        category_id = common.create_uuid()
         if is_numerical:
-            category_base = CategoryBase(id=common.create_uuid(), name=name,
+            category_base = CategoryBase(id=category_id, name=name,
                                             history=[common.create_history()],
                                             type=constants.METADATA_TYPE_NUMERIC)
-            new_category = Category(**category_base.dict(),
-                                    clusters=list(numpy.array(category_data, dtype=float)))
+            new_category = Category(**category_base.dict(), clusters=list(category_data))
         else:
-            cluster_names, cluster_lengths = self.__get_cluster_names_and_lengths(category_data)
-            category_base = CategoryBase(id=common.create_uuid(), name=name,
+            cluster_names, cluster_lengths = self.__get_cluster_names_and_lengths(category_data, sort=sort)
+            category_base = CategoryBase(id=category_id, name=name,
                                             clusterName=cluster_names,
                                             clusterLength=cluster_lengths,
                                             history=[common.create_history()],
@@ -126,13 +137,25 @@ class Metadata:
         category_meta = CategoryMeta(**category_base.dict())
         self.__metalist.add_category(category_meta)
         self.__categories[category_meta.id] = new_category
+        return category_id
 
     def change_reader(self, reader: Reader) -> None:
         self.__file_reader = reader
 
-    def __get_cluster_names_and_lengths(self, category_data: Collection) -> Tuple[List[str], List[int]]:
+    def __get_cluster_names_and_lengths(self, category_data: Collection, sort: bool=True) -> Tuple[List[str], List[int]]:
         cluster_names, cluster_lengths = numpy.unique(category_data,
                                                         return_counts=True)
+
+        if sort: # Descending order
+            ord = numpy.argsort(cluster_lengths)
+            cluster_lengths = cluster_lengths[ord][::-1]
+            cluster_names = cluster_names[ord][::-1]
+
+            # Brings unassigned to 1st position
+            is_uns = cluster_names == constants.UNASSIGNED
+            cluster_lengths = numpy.concatenate((cluster_lengths[is_uns], cluster_lengths[~is_uns]))
+            cluster_names = numpy.concatenate((cluster_names[is_uns], cluster_names[~is_uns]))
+
         if constants.UNASSIGNED in cluster_names:
             permutation = list(range(0, len(cluster_names)))
             index = numpy.where(cluster_names == constants.UNASSIGNED)[0][0]
@@ -187,7 +210,7 @@ class Metadata:
             print("WARNING: Removing category %s due to not appearing in metalist"
                     % invalid_category_id)
             self.__metalist.remove_category(invalid_category_id)
-    
+
     def get_content_by_id(self, id: str) -> Category:
         return self.__categories[id]
 
@@ -196,7 +219,7 @@ class Metadata:
         self.__categories[id] = content
         content_meta = content.__dict__.copy()
         content_meta.pop("clusters")
-        
+
         # Update CategoryBase
         self.__metalist.content[id] = CategoryMeta.parse_obj(content_meta)
 
