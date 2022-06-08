@@ -131,7 +131,9 @@ class Study:
         return self.dimred.remove(dimred_id)
 
     def add_metadata(self, name: str, value: List, subcluster_id="root", **kwargs) -> str:
-        if subcluster_id != "root":
+        if subcluster_id == "root":
+            meta_id = self.metadata.add_category(name, value, **kwargs)
+        else:
             graph_cluster = graphcluster.GraphCluster(subcluster_id, self.__location.sub, TextReader())
             selected_arr = graph_cluster.full_selected_array
 
@@ -140,8 +142,6 @@ class Study:
                 filled_category[main_i] = value[sub_i]
 
             meta_id = self.metadata.add_category(name, filled_category, **kwargs)
-        else:
-            meta_id = self.metadata.add_category(name, value, **kwargs)
 
         self.metadata.write_content_by_id(meta_id)
         self.metadata.write_metalist()
