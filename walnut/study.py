@@ -206,8 +206,10 @@ class Study:
         barcodes = np.array(self.expression.barcodes)
         return barcodes[idx]
 
-    def get_features(self) -> List[str]:
+    @property
+    def features(self) -> List[str]:
         return self.expression.features
 
-    def get_feature_type(self) -> List[str]:
+    @property
+    def feature_type(self) -> List[str]:
         return self.expression.feature_type
