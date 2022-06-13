@@ -2,7 +2,7 @@ import os
 from walnut import common
 from walnut.converters import IOMetaDimred, IOSingleDimred
 from walnut.FileIO import FileIO
-from walnut.readers import Reader
+from walnut.readers import Reader, TextReader
 from walnut.models import SingleDimred, SingleDimredBase, MetaDimred
 import pydantic
 from pydantic import validate_arguments
@@ -11,7 +11,7 @@ import pandas as pd
 
 class Dimred:
 
-	def __init__(self, dimred_folder: str, file_reader: Reader):
+	def __init__(self, dimred_folder: str, file_reader: Reader=TextReader()):
 		"""
 		Args:
 			dimred_folder (str): "GSE111111/main/dimred" or GSE11111/sub/[sub_id]/dimred

@@ -186,3 +186,28 @@ class Study:
             print("No pca result found in `%s`" % slot)
             return empty_array
         return pca_result[()].T
+
+    def get_spatial_coords(self, subcluster_id="root") -> np.ndarray:
+        struct = StudyStructure(self.__location.path)
+        struct.set_root(subcluster_id)
+        dimred = Dimred(struct.dimred)
+        omics = dimred.omics
+        idx = dimred.ids
+        spatial_dimred = dimred[idx[omics.index("spatial")]]
+        coords = spatial_dimred.coords
+        if not coords:
+            print("WARNING: Fail to load spatial coords")
+            return np.empty([])
+        return np.array(coords)
+
+    def get_barcodes(self, subcluster_id="root") -> List[str]:
+        graph_cluster = graphcluster.GraphCluster(subcluster_id, self.__location.sub, reader=TextReader())
+        idx = graph_cluster.full_selected_array
+        barcodes = np.array(self.expression.barcodes)
+        return barcodes[idx]
+
+    def get_features(self) -> List[str]:
+        return self.expression.features
+
+    def get_feature_type(self) -> List[str]:
+        return self.expression.feature_type
