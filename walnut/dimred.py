@@ -23,8 +23,8 @@ class Dimred:
 
 		try:
 			self.read()
-		except:
-			print("WARNING: Unable to initialize dimred")
+		except Exception as e:
+			print("WARNING: Unable to initialize dimred", common.exc_to_str(e))
 
 	def read(self) -> None:
 
@@ -88,6 +88,10 @@ class Dimred:
 		return [x.name for x in self.__dimreds.values()]
 
 	@property
+	def omics(self) -> List[str]:
+		return [x.param.omics for x in self.__dimreds.values()]
+
+	@property
 	def sizes(self) -> List[List[int]]:
 		return [x.size for x in self.__dimreds.values()]
 
@@ -111,8 +115,6 @@ class Dimred:
 
 		self.__dimreds[dimred_id] = single_dimred
 		return dimred_id
-
-
 
 	def remove(self, dimred_id):
 		if not dimred_id in self.ids:
@@ -149,7 +151,7 @@ class Dimred:
 
 
 	def __repr__(self):
-		return repr(pd.DataFrame({"IDs":self.ids, "Names": self.names, "Shape": self.sizes}))
+		return repr(pd.DataFrame({"IDs":self.ids, "Names": self.names, "Shape": self.sizes, "Omics": self.omics}))
 
 	def __iter__(self):
 		self.__max = len(self.ids) - 1
