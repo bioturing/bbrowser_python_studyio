@@ -38,9 +38,15 @@ class IOJSON(IOConverter[dict]):
 
 class IOCategory(IOConverter[Category]):
     @staticmethod
-    def from_str(s: str) -> Category:
+    def from_str(s: str, auto_fill_cluster_names=False) -> Category:
         content = json.loads(s)
         if isinstance(content, dict):
+            if auto_fill_cluster_names:
+                if (len(content["clusterName"]) < 1) and (len(content["clusterLength"]) < 1):
+                    cluster_length = max(content["clusters"])
+                    content["clusterName"] = ['Unassigned']
+                    for i in range(1, cluster_length+1):
+                        content["clusterName"].append(f"Cluster {i}")
             return Category.parse_obj(content)
         else:
             return Category(clusters=content)

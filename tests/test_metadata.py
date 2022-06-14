@@ -167,3 +167,85 @@ def test_update_metadata_2():
     assert content.clusters == [0, 1, 1, 0, 1, 0]
     assert content.clusterName == ["Unassigned", "New_cluster"]
     assert content.clusterLength == [3, 3]
+
+def test_new_metadata_1():
+    with open(os.path.join(meta_folder, "metalist.json"), "w") as fopen:
+        json.dump({"abc": {
+            "name": "test",
+            "id": "abc",
+            "type": "category",
+            "clusterName": ["Unassigned"],
+            "clusterLength": [6],
+            "history": [{"created_by": "walnut", "created_at": 123, "description": "test", "hash_id": "abcde"}]
+        }}, fopen)
+    with open(os.path.join(meta_folder, "abc.json"), "w") as fopen:
+        json.dump({
+            "name": "test",
+            "id": "abc",
+            "type": "category",
+            "clusters": [0, 0, 0, 0, 0, 0],
+            "clusterName": ["Unassigned"],
+            "clusterLength": [6],
+            "history": [{"created_by": "walnut", "created_at": 123, "description": "test", "hash_id": "abcde"}]
+        }, fopen)
+    
+    meta = Metadata(meta_folder, TextReader())
+    metadata_json = '{"id": "abc_2", "name": "new_test", "type": "category",\
+                        "clusters": [0, 0, 1, 1, 0, 1], "clusterName": [],\
+                                                    "clusterLength": []}'
+    meta.update_metadata("abc_2", IOCategory.from_str(metadata_json, auto_fill_cluster_names=True))
+    meta = Metadata(meta_folder, TextReader())
+    content = meta.get_content_by_id("abc_2")
+    assert content.name == "new_test"
+    assert content.clusters == [0, 0, 1, 1, 0, 1]
+    assert content.clusterName == ["Unassigned", "Cluster 1"]
+    assert content.clusterLength == [3, 3]
+
+def test_new_metadata_2():
+    with open(os.path.join(meta_folder, "metalist.json"), "w") as fopen:
+        json.dump({"abc": {
+            "name": "test",
+            "id": "abc",
+            "type": "category",
+            "clusterName": ["Unassigned"],
+            "clusterLength": [6],
+            "history": [{"created_by": "walnut", "created_at": 123, "description": "test", "hash_id": "abcde"}]
+        }}, fopen)
+    with open(os.path.join(meta_folder, "abc.json"), "w") as fopen:
+        json.dump({
+            "name": "test",
+            "id": "abc",
+            "type": "category",
+            "clusters": [0, 0, 0, 0, 0, 0],
+            "clusterName": ["Unassigned"],
+            "clusterLength": [6],
+            "history": [{"created_by": "walnut", "created_at": 123, "description": "test", "hash_id": "abcde"}]
+        }, fopen)
+    
+    sub_dir = os.path.join(study_dir, "sub")
+    os.makedirs(os.path.join(sub_dir, "abc_sub"), exist_ok=True)
+    cl_file = os.path.join(sub_dir, "abc_sub", "cluster_info.json")
+    with open(cl_file, "w") as fopen:
+        json.dump({
+            "id": "abc_sub",
+            "name": "test",
+            "history": [create_history().dict()],
+            "length": 4,
+            "version": 2,
+            "parent_id": "root",
+            "img": "",
+            "selectedArr": [1, 2, 4, 5]
+        }, fopen)
+
+    sub_cluster = GraphCluster("abc_sub", sub_dir, TextReader())
+    meta = Metadata(meta_folder, TextReader())
+    metadata_json = '{"id": "abc_2",  "name": "new_test", "type": "category",\
+                                                    "clusters": [1, 1, 1, 0], "clusterName": [],\
+                                                    "clusterLength": []}'
+    meta.update_metadata("abc_2", IOCategory.from_str(metadata_json, auto_fill_cluster_names=True), sub_cluster.get_selected_arr())
+    meta = Metadata(meta_folder, TextReader())
+    content = meta.get_content_by_id("abc_2")
+    assert content.name == "new_test"
+    assert content.clusters == [0, 1, 1, 0, 1, 0]
+    assert content.clusterName == ["Unassigned", "Cluster 1"]
+    assert content.clusterLength == [3, 3]

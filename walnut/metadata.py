@@ -30,7 +30,7 @@ def filter_cluster(content):
 def count_cluster_length(content):
     if content.type == constants.METADATA_TYPE_NUMERIC:
         return content
-    if len(content.clusterName) < 1 or len(content.clusterLength) < 1:
+    if len(content.clusterName) < 1 or len(content.clusters) < 1:
         return content
     content.clusterLength = [0]*len(content.clusterName)
     for id in content.clusters:
@@ -191,18 +191,28 @@ class Metadata:
     def get_content_by_id(self, id: str) -> Category:
         return self.__categories[id]
 
-    def update_metadata(self, id:str, content:Category, sub_array:List[int]=[]) -> None:
+    def update_metadata(self, id:str=common.create_uuid(), content:Category={}, sub_array:List[int]=[]) -> None:
+        # Add history
+        if len(content.history) < 1:
+            content.history.append(common.create_history(description="Init metadata"))
+
         if len(sub_array) != 0:
-            new_cluster = self.__categories[id].clusters.copy()
+            if self.__categories.get(id, False):
+                new_cluster = self.__categories[id].clusters.copy()
+            else:
+                first_key = list(self.__categories.keys())[0]
+                new_cluster = [0]*len(self.__categories[first_key].clusters)
             for idx, value in enumerate(content.clusters):
                 new_cluster[sub_array[idx]] = value
         else:
             new_cluster = content.clusters.copy()
 
         content.clusters = new_cluster.copy()
+        filter_content = filter_cluster(count_cluster_length(content))
+
         # Update Category
-        self.__categories[id] = content
-        content_meta = content.__dict__.copy()
+        self.__categories[id] = filter_content
+        content_meta = filter_content.__dict__.copy()
         content_meta.pop("clusters")
         
         # Update CategoryBase
@@ -232,6 +242,4 @@ class Metadata:
                 # FIXME: creates a model for each metadata type
 
         # Update categories at category id
-        filter_content = filter_cluster(count_cluster_length(content))
-        filter_content.history.append(common.create_history(description="Edit metadata"))
-        self.update_metadata(category_id, filter_content)
+        self.update_metadata(category_id, content)
