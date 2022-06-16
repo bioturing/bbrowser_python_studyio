@@ -10,7 +10,7 @@ class GeneWeight(BaseModel):
 class TopicCoordinates(BaseModel):
     x: List[float]
     y: List[float]
-    topic: List[int]
+    cell_type: List[int]
     frequency: List[float] 
 
 class DeconvolutionInfo(BaseModel):
@@ -18,5 +18,6 @@ class DeconvolutionInfo(BaseModel):
     cell_types: Dict[str, List[float]]
     genes: List[str]
     topic_coordinates: TopicCoordinates
+    log2_fc: Dict[str, List[float]]
 
 
