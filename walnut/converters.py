@@ -145,12 +145,3 @@ class IOGraphClusterDetail(IOConverter[GraphClusterDetail]):
     @staticmethod
     def to_str(content: GraphClusterDetail) -> str:
         return content.json()
-
-class IODeconvolution(IOConverter[DeconvolutionInfo]):
-    @staticmethod
-    def from_str(s: str) -> DeconvolutionInfo:
-        return DeconvolutionInfo(__root__=json.loads(s))
-
-    @staticmethod
-    def to_str(content: DeconvolutionInfo) -> str:
-        return content.json()

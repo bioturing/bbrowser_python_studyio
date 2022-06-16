@@ -5,4 +5,3 @@ from .run_info import *
 from .dimred import *
 from .expression import *
 from .spatial import *
-from .deconvolution import *
