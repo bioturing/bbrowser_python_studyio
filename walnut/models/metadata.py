@@ -2,7 +2,6 @@ from typing import Optional, List, Union, Dict, Any
 from xmlrpc.client import boolean
 from pydantic import BaseModel, validator
 import numpy
-
 from walnut.models import History
 from walnut import constants, common
 
@@ -29,6 +28,12 @@ class CategoryBase(BaseModel):
             if v[0] != constants.BIOTURING_UNASSIGNED:
                 raise ValueError("First value in \"clusterName\" must be \"%s\", not \"%s\""
                                     % (constants.BIOTURING_UNASSIGNED, v[0]))
+        return v
+
+    @validator("id", "name", "type", pre=True, always=True)
+    def unlist(cls, v):
+        if isinstance(v, list):
+            v = v[0]
         return v
 
 class CategoryMeta(CategoryBase):
