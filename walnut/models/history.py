@@ -4,22 +4,34 @@ from typing import Optional, Union, List
 
 class History(BaseModel):
     created_by: str
-    created_at: constants.NUM
+    created_at: constants.NUM = 2409 # Some history does not have this!
     hash_id: str
     message: Optional[str]
     description: Optional[str]
 
-    @validator("description", always=True)
-    def set_description(cls, desc, values: dict) -> None:
-        if not desc:
+    @validator("description", pre=True, always=True)
+    def set_description(cls, desc, values: dict):
+        # Handle description = None or = {}
+        if not isinstance(desc, str):
             desc = values.get("message")
-            assert isinstance(desc, str)
+            if not isinstance(desc, str):
+                desc = "None"
         return desc
 
-    @validator("created_by", "created_at", "hash_id", "description", pre=True, always=True)
-    def unlist(cls, v):
+    @validator("created_by", "hash_id", pre=True, always=True)
+    def handle_weird_string(cls, v):
         if isinstance(v, list):
             v = v[0]
+        if isinstance(v, dict):
+            v = "Invalid value found by walnut while parsing"
+        return v
+
+    @validator("created_at", pre=True, always=True)
+    def handle_weird_number(cls, v):
+        if isinstance(v, list):
+            v = v[0]
+        if isinstance(v, dict):
+            v = 2409
         return v
 
     @root_validator(pre=True)
