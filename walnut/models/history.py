@@ -27,7 +27,7 @@ class History(BaseModel):
         return v
 
     @validator("created_at", pre=True, always=True)
-    def handle_weird_number(cls, v):
+    def handle_weird_number(cls, v): # {} or [x]
         if isinstance(v, list):
             v = v[0]
         if isinstance(v, dict):

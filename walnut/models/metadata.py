@@ -1,6 +1,6 @@
 from typing import Optional, List, Union, Dict, Any
 from xmlrpc.client import boolean
-from pydantic import BaseModel, validator
+from pydantic import BaseModel, validator, root_validator
 import numpy
 from walnut.models import History
 from walnut import constants, common
@@ -43,6 +43,13 @@ class CategoryMeta(CategoryBase):
     type: constants.METADATA_TYPE_LIST = constants.METADATA_TYPE_CATEGORICAL
     clusterName: List[str] = []
     clusterLength: List[int] = []
+
+    @root_validator(pre=True)
+    def check_all(cls, values):
+        v = values['history']
+        if not isinstance(v, list): #history is not a list
+            values['history'] = [v]
+        return values
 
 class Category(CategoryBase):
     clusters: Union[List[int], List[float]]
