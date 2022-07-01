@@ -65,6 +65,7 @@ class IOMetalist(IOConverter[Metalist]):
             except Exception as e:
                 print("WARNING: Unable to parse category %s due to error: %s"
                         % (category_name, str(e)))
+                print(category)
                 invalid_categories.append(category_name)
 
         for invalid_cate in invalid_categories:

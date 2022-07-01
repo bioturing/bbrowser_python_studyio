@@ -40,16 +40,16 @@ class Expression:
 
         if self.raw_matrix is None:
             return
-        
+
         if self.norm_matrix is None:
             return
-        
+
         if self.barcodes is None:
             return
-        
+
         if self.features is None:
             return
-        
+
         if self.feature_type is None:
             return
 
@@ -62,7 +62,8 @@ class Expression:
 
     @property
     def exists(self) -> bool:
-        return os.path.isfile(self.path)
+        assert os.path.exists(self.path), "WARNING: No matrix.hdf5 is found at %s" % self.path
+        return os.path.exists(self.path)
 
 
     @property
@@ -218,7 +219,7 @@ class Expression:
 
         if self.raw_matrix is None:
             return False
-        
+
         if self.norm_matrix is None:
             return False
 
