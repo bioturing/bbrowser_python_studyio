@@ -13,9 +13,7 @@ class History(BaseModel):
     def set_description(cls, desc, values: dict):
         # Handle description = None or = {}
         if not isinstance(desc, str):
-            desc = values.get("message")
-            if not isinstance(desc, str):
-                desc = "None"
+            desc = "None"
         return desc
 
     @validator("created_by", "hash_id", pre=True, always=True)
@@ -43,4 +41,7 @@ class History(BaseModel):
             values['created_at'] = values.get('createdAt')
         if 'hashId' in values:
             values['hash_id'] = values.get('hashId')
+        if 'message' in values:
+            values['description'] = values['message']
+
         return values
