@@ -6,7 +6,7 @@ class History(BaseModel):
     created_by: str
     created_at: constants.NUM = 2409 # Some history does not have this!
     hash_id: str
-    message: Optional[str]
+    # message: Optional[str]
     description: Optional[str]
 
     @validator("description", pre=True, always=True)

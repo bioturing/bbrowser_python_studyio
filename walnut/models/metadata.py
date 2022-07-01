@@ -4,6 +4,7 @@ from pydantic import BaseModel, validator, root_validator
 import numpy
 from walnut.models import History
 from walnut import constants, common
+import numpy as np
 
 class CategoryBase(BaseModel):
     id: Optional[str]=None
@@ -30,11 +31,29 @@ class CategoryBase(BaseModel):
                                     % (constants.BIOTURING_UNASSIGNED, v[0]))
         return v
 
+    @validator("clusterLength", pre=True, always=True)
+    def ignore_weird_value(cls, v):
+        if not isinstance(v, list):
+            print("WARNING: clusterLength is not a valid list", v)
+            v = []
+        return v
+
     @validator("id", "name", "type", pre=True, always=True)
     def unlist(cls, v):
         if isinstance(v, list):
             v = v[0]
         return v
+
+    @validator("history", pre=True)
+    def check_history(cls, history_list):
+        try:
+            for v in history_list:
+                History(**v)
+        except Exception as e:
+            # Return dummy history when all else fail
+            history_list = [History(created_by = "walnut", created_at=2409, hash_id = common.create_uuid(), description="Dummy history")]
+        return history_list
+
 
 class CategoryMeta(CategoryBase):
     id: str
@@ -47,12 +66,19 @@ class CategoryMeta(CategoryBase):
     @root_validator(pre=True)
     def check_all(cls, values):
         v = values['history']
-        if not isinstance(v, list): #history is not a list
+        if not isinstance(v, list): # history is not a list
             values['history'] = [v]
         return values
 
 class Category(CategoryBase):
     clusters: Union[List[int], List[float]]
+
+    @validator("clusters", each_item=True, pre=True)
+    def check_number(cls, v):
+        for i, value in enumerate(v):
+            if not isinstance(value, (int, float)):
+                v[i] = np.nan
+        return v
 
 class Metalist(BaseModel):
     version: Optional[int] = None
