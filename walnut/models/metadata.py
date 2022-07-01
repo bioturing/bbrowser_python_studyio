@@ -65,7 +65,7 @@ class CategoryMeta(CategoryBase):
 
     @root_validator(pre=True)
     def check_all(cls, values):
-        v = values['history']
+        v = values.get("history")
         if not isinstance(v, list): # history is not a list
             values['history'] = [v]
         return values
