@@ -62,7 +62,8 @@ class Expression:
 
     @property
     def exists(self) -> bool:
-        assert os.path.exists(self.path), "WARNING: No matrix.hdf5 is found at %s" % self.path
+        if not os.path.exists(self.path):
+            print("WARNING: No matrix.hdf5 is found at %s" % self.path)
         return os.path.exists(self.path)
 
 
