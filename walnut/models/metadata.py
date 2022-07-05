@@ -1,10 +1,8 @@
-from typing import Optional, List, Union, Dict, Any
-from xmlrpc.client import boolean
+from typing import Optional, List, Union, Dict
 from pydantic import BaseModel, validator, root_validator
 import numpy
 from walnut.models import History
 from walnut import constants, common
-import numpy as np
 
 class CategoryBase(BaseModel):
     id: Optional[str]=None
@@ -71,13 +69,13 @@ class CategoryMeta(CategoryBase):
         return values
 
 class Category(CategoryBase):
-    clusters: Union[List[int], List[float]]
+    clusters: Union[List[Union[int, None]], List[Union[float, None]]]
 
     @validator("clusters", each_item=True, pre=True)
     def check_number(cls, v):
         for i, value in enumerate(v):
             if not isinstance(value, (int, float)):
-                v[i] = np.nan
+                v[i] = None
         return v
 
 class Metalist(BaseModel):

@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "walnut"
-version = "0.1.2"
+version = "0.1.3"
 description = "Read or write a BBrowser study"
 authors = [
     "Tri Le <tri@bioturing.com>",
