@@ -9,6 +9,35 @@ from walnut.readers import TextReader
 from walnut import common
 meta_folder = tempfile.mkdtemp()
 
+def test_load_single_category():
+    with open(os.path.join(meta_folder, "metalist.json"), "w") as fopen:
+        json.dump({"abc": {
+            "name": "test",
+            "id": "abc",
+            "type": "category",
+            "clusterName": ["Unassigned"],
+            "clusterLength": [6],
+            "history": [{"created_by": "walnut", "created_at": 123, "description": "test", "hash_id": "abcde"}]
+        }}, fopen)
+    with open(os.path.join(meta_folder, "abc.json"), "w") as fopen:
+        json.dump({
+            "name": "test",
+            "id": "abc",
+            "type": "category",
+            "clusters": [0, 0, 0, 0, 0, 0],
+            "clusterName": ["Unassigned"],
+            "clusterLength": [6],
+            "history": [{"created_by": "walnut", "created_at": 123, "description": "test", "hash_id": "abcde"}]
+        }, fopen) 
+    
+    meta = Metadata(meta_folder, TextReader())
+    meta.read()
+    assert meta.length == 1
+    assert meta.get('abc').size == 6
+    dfs = meta.to_df().shape
+    assert dfs[0] == 6
+    assert dfs[1] == 1
+
 def test_version_0(): # no type, no history, no id
     with open(os.path.join(meta_folder, "metalist.json"), "w") as fopen:
         json.dump({"abc": {"name": "test", "clusterName": ["Unassigned"], "clusterLength": [3]}}, fopen)
@@ -16,6 +45,7 @@ def test_version_0(): # no type, no history, no id
         json.dump([0, 0, 0], fopen)
     
     meta = Metadata(meta_folder, TextReader())
+
     assert meta.to_df().index.size == 3
 
 def test_version_1():

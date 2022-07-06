@@ -90,6 +90,9 @@ class Metalist(BaseModel):
                 content[id]["id"] = id
             content[id] = CategoryMeta.parse_obj(content[id])
         return content
+    
+    def exists(self, meta_id) -> bool:
+        return meta_id in self.content
 
     def get_category_ids(self) -> List[str]:
         return [x for x in self.content.keys()]

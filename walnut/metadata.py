@@ -43,16 +43,19 @@ class Metadata:
         self.__file_reader = file_reader
         self.__metalist = Metalist(content={})
         self.__categories: Dict[str, Category] = {}
-        try:
-            self.read()
-        except:
-            print("WARNING: Unable to initialize metadata")
+        # try:
+        #     self.read()
+        # except:
+        #     print("WARNING: Unable to initialize metadata")
 
     def read(self) -> None:
         self.__metalist = self.__get_metalist_io().read()
-        self.__categories = self.__read_categories()
-
-        self.__purge_invalid_categories()
+        # self.__categories = self.__read_categories()
+        # self.__purge_invalid_categories()
+    
+    @property
+    def length(self):
+        return len(self.__metalist.get_category_ids())
 
     def write_metalist(self) -> None:
         self.__get_metalist_io().write(self.__metalist)
@@ -67,26 +70,10 @@ class Metadata:
 
     def to_df(self) -> pandas.DataFrame:
         df = pandas.DataFrame()
-        names = [self.__metalist.get_category_meta(cate_key).name
-                    for cate_key in self.__metalist.get_category_ids()]
-        names, counts = numpy.unique(names, return_counts=True)
-        name_index = {}
-        for x, y in zip(names, counts):
-            if y > 1:
-                name_index[x] = 1
-
-        for category_id, category in self.__categories.items():
-            values = self.__metalist.get_category_data(category_id, category)
-            name = self.__metalist.get_category_meta(category_id).name
-
-            if name in name_index:
-                name_with_index = "%s (%d)" % (name, name_index[name])
-                name_index[name] += 1
-            else:
-                name_with_index = name
-
-            df[name_with_index] = values
-
+        for meta_id in self.__metalist.get_category_ids():
+            meta = self.__metalist.get_category_meta(meta_id)
+            col_name = "%s (%s)" % (meta.name, meta_id)
+            df[col_name] = self.get(meta_id)
         return df
 
     def add_dataframe(self, category_data: pandas.DataFrame):
@@ -183,6 +170,21 @@ class Metadata:
 
     def __get_category_path(self, category_id: str) -> str:
         return os.path.join(self.__dir, f"{category_id}.json")
+
+    def get(self, meta_id: str) -> numpy.ndarray:
+        """ Create a metadata array using an ID """
+
+        if not self.__metalist.exists(meta_id):
+            raise Exception("%s does not exists" % meta_id)
+        meta = self.__metalist.get_category_meta(meta_id)
+        clusters = self.__get_category_io(meta_id).read().clusters
+        if meta.type == "numeric":
+            arr = numpy.array(clusters, dtype="float") # None -> np.nan
+        else:
+            indices = numpy.array(clusters, dtype="int64")
+            arr = numpy.array(meta.clusterName)[indices]
+        return arr
+        
 
     def __read_categories(self) -> Dict[str, Category]:
         categories: Dict[str, Category] = {}
