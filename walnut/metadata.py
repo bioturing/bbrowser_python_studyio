@@ -59,7 +59,7 @@ class Metadata:
         """ Refresh content of metalist """
         self.__metalist = self.__get_metalist_io().read()
         id = self.__metalist.get_category_ids()[0]
-        self.__n_cells = sum(self.__metalist.content[id].clusterLength)
+        self.__n_cells = len(self.get(id))
         # self.__purge_invalid_categories()
 
     @property
