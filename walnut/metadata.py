@@ -45,17 +45,23 @@ class Metadata:
         self.__file_reader = file_reader
         self.__metalist = Metalist(content={})
         self.__categories: Dict[str, Category] = {}
+        self.__n_cells = None
         try:
             self.read()
-        except:
-            print("WARNING: No data to read")
+
+        except FileNotFoundError as e:
+            print("WARNING: No metalist data to read")
+        except Exception as e:
+            print("Could not init Metadata")
+            raise e # To prevent unwanted modification
 
     def read(self) -> None:
         """ Refresh content of metalist """
         self.__metalist = self.__get_metalist_io().read()
-        # self.__categories = self.__read_categories()
+        id = self.__metalist.get_category_ids()[0]
+        self.__n_cells = sum(self.__metalist.content[id].clusterLength)
         # self.__purge_invalid_categories()
-    
+
     @property
     def length(self):
         return len(self.__metalist.get_category_ids())
@@ -96,9 +102,11 @@ class Metadata:
         Create a new metadata in an existing metadata
         """
 
-        if len(self.__categories) > 0:
-            # If at least a metadata exists, validates the size of the new metadata
-            assert len(category_data) == len(list(self.__categories.values())[0].clusters), \
+        if self.__n_cells is None:
+            self.__n_cells = len(category_data) # First metadata
+        else:
+            # n_cells data exists, validates the size of the new metadata
+            assert len(category_data) == self.__n_cells, \
                     "New category's length must equal existing lengths"
 
         is_numerical = False
@@ -184,7 +192,7 @@ class Metadata:
 
     def __get_category_path(self, category_id: str) -> str:
         return os.path.join(self.__dir, f"{category_id}.json")
-    
+
     def __get_single_meta_content(self, meta_id: str) -> Category:
         """ Get raw content of a metadata """
 
@@ -203,7 +211,7 @@ class Metadata:
             indices = numpy.array(clusters, dtype="int64")
             arr = numpy.array(meta.clusterName)[indices]
         return arr
-        
+
 
     def __read_categories(self) -> Dict[str, Category]:
         categories: Dict[str, Category] = {}
@@ -260,7 +268,7 @@ class Metadata:
 
             for idx in indices:
                 content.clusters[idx] = anno_id
-            
+
             # Update categories at category id
             content = filter_cluster(count_cluster_length(content))
             content.history.append(common.create_history(description="Edit metadata"))
@@ -271,7 +279,7 @@ class Metadata:
                 content.clusters[idx] = float(value) # type: ignore
                 # FIXME: creates a model for each metadata type
 
-    
+
         # Write files
         category_meta = CategoryMeta(**content.dict())
         self.__metalist.content[category_id] = CategoryMeta.parse_obj(category_meta)
