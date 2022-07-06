@@ -11,7 +11,9 @@ from walnut.readers import Reader
 from walnut.converters import IOCategory, IOMetalist
 from walnut.FileIO import FileIO
 
-def filter_cluster(content):
+def filter_cluster(content: Category) -> Category:
+    """ Filter out empty labels (except Unassigned) """
+
     if content.type == constants.METADATA_TYPE_NUMERIC:
         return content
     cluster_index = [0]*len(content.clusterName)
@@ -27,7 +29,7 @@ def filter_cluster(content):
             content.clusterLength = [length for idx, length in enumerate(content.clusterLength) if (idx == 0 or length > 0)]
     return content
 
-def count_cluster_length(content):
+def count_cluster_length(content: Category) -> Category:
     if content.type == constants.METADATA_TYPE_NUMERIC:
         return content
     if len(content.clusterName) < 1 or len(content.clusterLength) < 1:
@@ -43,12 +45,13 @@ class Metadata:
         self.__file_reader = file_reader
         self.__metalist = Metalist(content={})
         self.__categories: Dict[str, Category] = {}
-        # try:
-        #     self.read()
-        # except:
-        #     print("WARNING: Unable to initialize metadata")
+        try:
+            self.read()
+        except:
+            print("WARNING: No data to read")
 
     def read(self) -> None:
+        """ Refresh content of metalist """
         self.__metalist = self.__get_metalist_io().read()
         # self.__categories = self.__read_categories()
         # self.__purge_invalid_categories()
@@ -57,30 +60,36 @@ class Metadata:
     def length(self):
         return len(self.__metalist.get_category_ids())
 
-    def write_metalist(self) -> None:
+    def __write_metalist(self) -> None:
         self.__get_metalist_io().write(self.__metalist)
 
-    def write_content_by_id(self, id) -> None:
+    def __write_content_by_id(self, id) -> None:
         self.__get_category_io(id).write(self.__categories[id])
 
     def write_all(self) -> None:
-        self.write_metalist()
+        self.__write_metalist()
         for category_id in self.__categories:
-            self.write_content_by_id(category_id)
+            self.__write_content_by_id(category_id)
 
     def to_df(self) -> pandas.DataFrame:
+        """ Create a metadata data frame """
+
         df = pandas.DataFrame()
         for meta_id in self.__metalist.get_category_ids():
             meta = self.__metalist.get_category_meta(meta_id)
             col_name = "%s (%s)" % (meta.name, meta_id)
-            df[col_name] = self.get(meta_id)
+            try:
+                df[col_name] = self.get(meta_id)
+            except:
+                print("WARNING: %s is not a valid metadata" % meta_id)
         return df
 
     def add_dataframe(self, category_data: pandas.DataFrame):
         for column_name in category_data:
-            self.add_category(column_name, list(category_data[column_name]))
+            self.add_category(column_name, list(category_data[column_name]), write_metalist=False)
+        self.__write_metalist()
 
-    def add_category(self, name: str, category_data: Collection, type: Literal["auto", "category", "numeric"]="auto", sort: bool=True) -> str:
+    def add_category(self, name: str, category_data: Collection, type: Literal["auto", "category", "numeric"]="auto", sort: bool=True, write_metalist=True) -> str:
         """
         Add a metadata
 
@@ -123,7 +132,12 @@ class Metadata:
 
         category_meta = CategoryMeta(**category_base.dict())
         self.__metalist.add_category(category_meta)
-        self.__categories[category_meta.id] = new_category
+
+        # Write files
+        if write_metalist:
+            self.__write_metalist()
+        self.__get_category_io(category_id).write(new_category)
+
         return category_id
 
     def change_reader(self, reader: Reader) -> None:
@@ -170,15 +184,20 @@ class Metadata:
 
     def __get_category_path(self, category_id: str) -> str:
         return os.path.join(self.__dir, f"{category_id}.json")
+    
+    def __get_single_meta_content(self, meta_id: str) -> Category:
+        """ Get raw content of a metadata """
+
+        if not self.__metalist.exists(meta_id):
+            raise Exception("%s does not exists" % meta_id)
+        return self.__get_category_io(meta_id).read()
 
     def get(self, meta_id: str) -> numpy.ndarray:
         """ Create a metadata array using an ID """
 
-        if not self.__metalist.exists(meta_id):
-            raise Exception("%s does not exists" % meta_id)
+        clusters = self.__get_single_meta_content(meta_id).clusters
         meta = self.__metalist.get_category_meta(meta_id)
-        clusters = self.__get_category_io(meta_id).read().clusters
-        if meta.type == "numeric":
+        if meta.type == constants.METADATA_TYPE_NUMERIC:
             arr = numpy.array(clusters, dtype="float") # None -> np.nan
         else:
             indices = numpy.array(clusters, dtype="int64")
@@ -214,9 +233,9 @@ class Metadata:
             self.__metalist.remove_category(invalid_category_id)
 
     def get_content_by_id(self, id: str) -> Category:
-        return self.__categories[id]
+        return self.__get_single_meta_content(id)
 
-    def update_metadata(self, id:str, content:Category) -> None:
+    def __update_metadata(self, id: str, content: Category) -> None:
         # Update Category
         self.__categories[id] = content
         content_meta = content.__dict__.copy()
@@ -230,7 +249,7 @@ class Metadata:
         self.write_content_by_id(id)
 
     def add_label(self, category_id: str, value: Union[str, int, float], indices: List[int]) -> None:
-        content = self.__categories[category_id]
+        content = self.__get_single_meta_content(category_id)
         if content.type == constants.METADATA_TYPE_CATEGORICAL:
             assert isinstance(value, str)
             if value in content.clusterName:
@@ -241,6 +260,10 @@ class Metadata:
 
             for idx in indices:
                 content.clusters[idx] = anno_id
+            
+            # Update categories at category id
+            content = filter_cluster(count_cluster_length(content))
+            content.history.append(common.create_history(description="Edit metadata"))
 
         if content.type == constants.METADATA_TYPE_NUMERIC:
             assert isinstance(float(value), float)
@@ -248,7 +271,9 @@ class Metadata:
                 content.clusters[idx] = float(value) # type: ignore
                 # FIXME: creates a model for each metadata type
 
-        # Update categories at category id
-        filter_content = filter_cluster(count_cluster_length(content))
-        filter_content.history.append(common.create_history(description="Edit metadata"))
-        self.update_metadata(category_id, filter_content)
+    
+        # Write files
+        category_meta = CategoryMeta(**content.dict())
+        self.__metalist.content[category_id] = CategoryMeta.parse_obj(category_meta)
+        self.__write_metalist()
+        self.__get_category_io(category_id).write(content)
