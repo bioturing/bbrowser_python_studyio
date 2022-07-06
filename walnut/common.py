@@ -10,6 +10,7 @@ from walnut.models import History
 from typing import Type, TypeVar, Generic
 from walnut import constants
 import shutil
+import h5py
 
 FileContent = TypeVar("FileContent")
 
@@ -122,3 +123,20 @@ def clear_folder(x: str):
     if os.path.isdir(x):
         shutil.rmtree(x)
     os.makedirs(x)
+
+def get_1d_dataset(fopen: h5py.Group, key: str) -> List[Any]:
+    h5data = fopen[key]
+    if not isinstance(h5data, h5py.Dataset):
+        raise Exception('%s does not exist' % key)
+    return h5data[:].flatten()
+
+def read_sparse_mtx(fopen: h5py.Group, key: str) -> sparse.csc_matrix:
+    data = get_1d_dataset(fopen, f"{key}/data")
+    i =  get_1d_dataset(fopen, f"{key}/indices")
+    p = get_1d_dataset(fopen, f"{key}/indptr")
+    shape =  get_1d_dataset(fopen, f"{key}/shape")
+
+    return sparse.csc_matrix(
+                    (data, i, p),
+                    shape=shape
+                )

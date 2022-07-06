@@ -8,7 +8,7 @@ from walnut.expression import Expression
 from walnut.run_info import RunInfo
 from walnut.readers import TextReader
 from walnut.gene_db import StudyGeneDB
-from walnut.common import create_uuid
+from walnut.common import create_uuid, read_sparse_mtx
 from walnut import constants, graphcluster
 from scipy import sparse
 import numpy as np
@@ -185,4 +185,10 @@ class Study:
         if pca_result is None:
             print("No pca result found in `%s`" % slot)
             return empty_array
-        return pca_result[()].T
+        if slot == "cca":
+            with h5py.File(pca_path, "r") as fopen:
+                result = read_sparse_mtx(fopen, slot).T.toarray()
+
+        else:
+            result = pca_result[()].T
+        return result
