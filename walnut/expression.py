@@ -7,6 +7,7 @@ from scipy import sparse
 import scanpy as sc
 import anndata
 from walnut.models import ExpressionData
+from walnut.common import read_sparse_mtx, get_1d_dataset
 from walnut import constants
 from anndata._core.sparse_dataset import SparseDataset
 
@@ -77,7 +78,7 @@ class Expression:
             return None
 
         with h5py.File(self.path, "r") as fopen:
-            features = self.get_1d_dataset(fopen, "bioturing/features")
+            features = get_1d_dataset(fopen, "bioturing/features")
             return [x.decode() for x in features]
 
 
@@ -91,7 +92,7 @@ class Expression:
             return None
 
         with h5py.File(self.path, "r") as fopen:
-            barcodes = self.get_1d_dataset(fopen, "bioturing/barcodes")
+            barcodes = get_1d_dataset(fopen, "bioturing/barcodes")
             return [x.decode() for x in barcodes]
 
     @property
@@ -110,11 +111,11 @@ class Expression:
                 return None
 
             if "feature_type" in h5bioturing.keys(): # Old study does not have feature_type
-                feature_type = self.get_1d_dataset(fopen, "bioturing/feature_type")
+                feature_type = get_1d_dataset(fopen, "bioturing/feature_type")
                 feature_type = [x.decode() for x in feature_type] # Tolerate weird shape of feature_type
             else :
                 print("WARNING: This study does not contain info for feature type")
-                features = self.get_1d_dataset(fopen, "bioturing/features")
+                features = get_1d_dataset(fopen, "bioturing/features")
                 features = [x.decode() for x in features]
                 feature_type = [self.detect_feature_type(x) for x in features]
         return feature_type
@@ -129,15 +130,9 @@ class Expression:
             return None
 
         with h5py.File(self.path, "r") as fopen:
-            data = self.get_1d_dataset(fopen, "bioturing/data")
-            i = self.get_1d_dataset(fopen, "bioturing/indices")
-            p = self.get_1d_dataset(fopen, "bioturing/indptr")
-            shape = self.get_1d_dataset(fopen, "bioturing/shape")
+            mtx = read_sparse_mtx(fopen, "bioturing")
 
-        return sparse.csc_matrix(
-                (data, i, p),
-                shape=shape
-            )
+        return mtx
 
 
     @property
@@ -150,15 +145,9 @@ class Expression:
             return None
 
         with h5py.File(self.path, "r") as fopen:
-            data = self.get_1d_dataset(fopen, "normalizedT/data")
-            i = self.get_1d_dataset(fopen, "normalizedT/indices")
-            p = self.get_1d_dataset(fopen, "normalizedT/indptr")
-            shape = self.get_1d_dataset(fopen, "normalizedT/shape")
+            mtx = read_sparse_mtx(fopen, "normalizedT")
 
-        return sparse.csc_matrix(
-                (data, i, p),
-                shape=shape
-            ).T.tocsc()
+        return mtx.T.tocsc()
 
 
     @staticmethod
@@ -174,12 +163,6 @@ class Expression:
         adata = anndata.AnnData(raw_matrix)
         sc.pp.normalize_total(adata, target_sum=1e4)
         return adata.X  # type: ignore
-
-    def get_1d_dataset(self, fopen, group) -> List[Any]:
-        h5data = fopen[group]
-        if not isinstance(h5data, h5py.Dataset):
-            raise Exception('%s does not exist' % group)
-        return h5data[:].flatten()
 
     def add_expression_data(self, raw_matrix: Union[sparse.csc_matrix, sparse.csr_matrix],
                             barcodes: List[str],
