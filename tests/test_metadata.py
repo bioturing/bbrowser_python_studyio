@@ -139,3 +139,25 @@ def test_add_metadata():
     id = meta.add_category("test4", ["b", "a", "a"])
     cate = meta.get_content_by_id(id)
     assert cate.clusterName[1] == "a"
+
+def test_add_metadata_with_len_check():
+    with open(os.path.join(meta_folder, "metalist.json"), "w") as fopen:
+        json.dump({"abc": {
+            "name": "test",
+            "id": "abc",
+            "type": "numeric",
+            "history": [{"created_by": "walnut", "created_at": 123, "description": "test", "hash_id": "abcde"}]
+        }}, fopen)
+    with open(os.path.join(meta_folder, "abc.json"), "w") as fopen:
+        json.dump({
+            "name": "test",
+            "id": "abc",
+            "type": "numeric",
+            "clusters": [0, 1, 0.4, 2, 3.1, 5.2],
+            "history": [{"created_by": "walnut", "created_at": 123, "description": "test", "hash_id": "abcde"}]
+        }, fopen)
+    
+    meta = Metadata(meta_folder, TextReader())
+    assert meta.get('abc').size == 6
+    meta_id = meta.add_category('test 2', ['a', 'c', 'b', 'c', 'a', 'b'])
+    assert meta.get(meta_id).size == 6
