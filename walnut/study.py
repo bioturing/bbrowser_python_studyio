@@ -143,9 +143,6 @@ class Study:
 
             meta_id = self.metadata.add_category(name, filled_category, **kwargs)
 
-        self.metadata.write_content_by_id(meta_id)
-        self.metadata.write_metalist()
-
         return meta_id
 
     def get_expression(self, subcluster_id="root", type: constants.UNIT_TYPE_LIST="raw") -> np.ndarray:
