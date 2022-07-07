@@ -1,4 +1,4 @@
-from typing import List, Dict, Tuple, Optional
+from typing import List, Dict, Tuple, Optional, Union
 from pydantic import BaseModel, validator
 from walnut import constants, common
 
@@ -40,7 +40,9 @@ class AnaSetting(BaseModel):
       if not isinstance(v, list):
         v = [v] # Fix "bcs" -> ["bcs"]
       for i, item in enumerate(v):
-        v[i] = v[i].lower() # backward compatibility
+        v[i] = item.lower() # backward compatibility
+        if v[i] == 'singlemtx':
+            v[i] = 'mtx'
       return v
 
 class RunInfo(BaseModel):
@@ -60,7 +62,7 @@ class RunInfo(BaseModel):
     tag: List[str] = []
     history: List[common.History] = [common.create_history()]
     is_public: bool = True
-    ana_setting: AnaSetting = AnaSetting()
+    ana_setting: Optional[AnaSetting]
     n_batch: Optional[int] = 1
     version: Optional[int] = 16
 
@@ -81,8 +83,16 @@ class RunInfo(BaseModel):
     def set_version(cls, _):
         return 16
 
+    @validator("ana_setting", always=True, pre=True)
+    def set_ana_setting(cls, ana_setting: Union[Dict, None]):
+        if not ana_setting:
+            return AnaSetting()
+        else:
+            return AnaSetting.parse_obj(ana_setting)
+
     @validator("n_batch", always=True)
     def set_n_batch(cls, _, values):
+        # ana_setting was validated above. So we are safe to get 'ana_setting'
         return len(values["ana_setting"].inputType)
 
     @validator("unit_settings", pre=True)
