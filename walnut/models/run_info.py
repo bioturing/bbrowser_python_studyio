@@ -41,6 +41,8 @@ class AnaSetting(BaseModel):
         v = [v] # Fix "bcs" -> ["bcs"]
       for i, item in enumerate(v):
         v[i] = item.lower() # backward compatibility
+        if v[i] == 'singlemtx':
+            v[i] = 'mtx'
       return v
 
 class RunInfo(BaseModel):
@@ -81,24 +83,17 @@ class RunInfo(BaseModel):
     def set_version(cls, _):
         return 16
 
-    @validator("ana_setting", always=True)
-    def set_ana_setting(cls, ana_setting: Union[AnaSetting, None], values):
-        print("VALIDATE ANA OF VALUES", values)
+    @validator("ana_setting", always=True, pre=True)
+    def set_ana_setting(cls, ana_setting: Union[Dict, None]):
         if not ana_setting:
             return AnaSetting()
         else:
-            return ana_setting 
+            return AnaSetting.parse_obj(ana_setting)
 
     @validator("n_batch", always=True)
     def set_n_batch(cls, _, values):
-        print("VALIDATE N_BATCH OF VALUES", values)
-        default_ana_setting = AnaSetting()
-        #print("default ana setting", default_ana_setting)
-        #print("Annsettings from values", values.get("ana_setting"))
-        if values.get("ana_setting"):
-            return len(values["ana_setting"].inputType)
-        else:
-            return len(default_ana_setting.inputType)
+        # ana_setting was validated above. So we are safe to get 'ana_setting'
+        return len(values["ana_setting"].inputType)
 
     @validator("unit_settings", pre=True)
     def set_unit_settings(cls, value):
