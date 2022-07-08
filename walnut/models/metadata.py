@@ -46,9 +46,11 @@ class CategoryBase(BaseModel):
     def check_history(cls, history_list):
         try:
             for v in history_list:
-                History(**v)
+                History.parse_obj(v)
         except Exception as e:
             # Return dummy history when all else fail
+            import traceback
+            print(traceback.format_exc())
             history_list = [History(created_by = "walnut", created_at=2409, hash_id = common.create_uuid(), description="Dummy history")]
         return history_list
 
@@ -90,7 +92,7 @@ class Metalist(BaseModel):
                 content[id]["id"] = id
             content[id] = CategoryMeta.parse_obj(content[id])
         return content
-    
+
     def exists(self, meta_id) -> bool:
         return meta_id in self.content
 
