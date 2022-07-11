@@ -137,7 +137,7 @@ class Study:
             graph_cluster = graphcluster.GraphCluster(subcluster_id, self.__location.sub, TextReader())
             selected_arr = graph_cluster.full_selected_array
 
-            filled_category = np.repeat(constants.BIOTURING_UNASSIGNED, self.n_cell)
+            filled_category = np.repeat(constants.BIOTURING_UNASSIGNED if kwargs.get("type") == "category" else None, self.n_cell)
             for sub_i, main_i in enumerate(selected_arr):  # type: ignore
                 filled_category[main_i] = value[sub_i]
 
