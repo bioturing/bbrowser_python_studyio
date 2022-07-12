@@ -107,7 +107,7 @@ def test_write_file():
     arr = meta.get("abc")
     assert arr[arr == "New_cluster"].size == 3
 
-def test_add_metadata():
+def test_add_metadata_0():
     common.clear_folder(meta_folder)
     meta = Metadata(meta_folder, TextReader())
 
@@ -139,6 +139,9 @@ def test_add_metadata():
     id = meta.add_category("test4", ["b", "a", "a"])
     cate = meta.get_content_by_id(id)
     assert cate.clusterName[1] == "a"
+
+    # Add numeric with None
+    id = meta.add_category("test5", [2, None, 1], type="numeric")
 
 def test_add_metadata_with_len_check():
     with open(os.path.join(meta_folder, "metalist.json"), "w") as fopen:

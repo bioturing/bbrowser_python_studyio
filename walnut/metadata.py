@@ -124,7 +124,11 @@ class Metadata:
             category_base = CategoryBase(id=category_id, name=name,
                                             history=[common.create_history()],
                                             type=constants.METADATA_TYPE_NUMERIC)
-            new_category = Category(**category_base.dict(), clusters=list(category_data))
+
+            # Ensure nan is None
+            clusters = [None if numpy.isnan(x) else x for x in list(category_data)]
+
+            new_category = Category(**category_base.dict(), clusters=clusters)
         else:
             cluster_names, cluster_lengths = self.__get_cluster_names_and_lengths(category_data, sort=sort)
             category_base = CategoryBase(id=category_id, name=name,
