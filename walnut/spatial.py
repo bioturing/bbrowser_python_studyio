@@ -122,8 +122,8 @@ class Spatial:
     def update(self,
         width: float,
         height: float,
-        diameter: List[float],
-        diameter_micron: List[float],
+        diameter: Union[List[float], float],
+        diameter_micron: Union[List[float], float],
         version: int = 1
     ):
         try:

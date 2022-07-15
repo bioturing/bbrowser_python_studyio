@@ -1,5 +1,5 @@
 from pydantic import BaseModel, validator
-from typing import List, get_args
+from typing import List, get_args, Union
 
 from walnut import constants
 
@@ -10,8 +10,8 @@ class SpatialInfo(BaseModel):
 
     width: float = 0
     height: float = 0
-    diameter: List[float] = []
-    diameter_micron: List[float] = []
+    diameter: Union[List[float], float] = []
+    diameter_micron: Union[List[float], float] = []
     version: int = 1
     
 class ImageInfo(BaseModel):
