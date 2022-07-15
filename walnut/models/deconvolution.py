@@ -91,6 +91,15 @@ class DeconvolutionResultHandler:
         return json.loads(reader.read(path))
 
 
+    def remove(self, id: str):
+        with sqlite3.connect(self.db_path) as con:
+            print(id)
+            cursor = con.cursor()
+            cursor.execute(f'''DELETE FROM {self.table_key} WHERE ID = "{id}"''')
+            con.commit()
+        path = self.__get_result_path(id)
+        os.remove(path)
+
     def add_new_result(self, meta_info: DeconvolutionMetaInfo, result: DeconvolutionResult):
 
         self.write(meta_info.id, result)
