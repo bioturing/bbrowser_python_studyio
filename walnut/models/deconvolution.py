@@ -8,57 +8,6 @@ from walnut.common import get_timestamp
 from walnut.readers import TextReader
 
 
-class DeconvolutionArgs(BaseModel):
-    class Config:
-        validate_assignment = True
-
-    study_dir: str
-    """
-    path to study
-    """
-    subcluster_id: str = "root"
-    """
-    id of a sub cluster (root if it is main cluster)
-    """
-    n_top_genes: int = 1000
-    """
-    number of highly-variable genes to keep
-    """
-    min_genes: int = 0
-    """
-    minimum number of genes required for a cell
-    """
-    min_cells: int = 0
-    """
-    minimum number of cells expressed required for a gene
-    """
-    max_cells: int = None
-    """
-    maximum number of cells expressed required for a gene
-    """
-    min_celltypes: int
-    max_celltypes: int
-    """
-    range of toptics to train
-    """
-    image_path: Optional[str]
-    """
-    path to image to draw pie
-    """
-    output_path: str
-    """
-    output path to write result
-    """
-    result_id: str
-    """
-    output path to write result
-    """
-    legend: bool = False
-    """
-    include legend in image or not
-    """
-    random_state: int = 2409
-
 class SpotCellTypes(BaseModel):
     __root__: Dict[str, List[float]]
 
@@ -68,7 +17,10 @@ class CellTypeCoordinates(BaseModel):
     cell_type: List[int]
     frequency: List[float]
 
-class DeconvolutionInfo(BaseModel):
+class DeconvolutionResult(BaseModel):
+    """
+    Data model for actual result of a deconvolution analysis
+    """
     spot_celltypes: SpotCellTypes
     celltype_names: Dict[str, str]
     celltypes: Dict[str, List[float]]
@@ -78,9 +30,16 @@ class DeconvolutionInfo(BaseModel):
     image_data: Optional[str]
     colors: Optional[List[str]]
     n_topics: Optional[int]
-    params: Optional[DeconvolutionArgs]
 
-class DeconvolutionResult:
+class DeconvolutionMetaInfo(BaseModel):
+    """
+    Data model for meta info of a deconvolution analysis
+    """
+    id: str
+    n_topics: int
+    params: str
+
+class DeconvolutionResultHandler:
     def __init__(self, deconvolution_folder: str) -> None:
         self.__dir = deconvolution_folder
         self.db_path = os.path.join(self.__dir, 'deconvolution_result.db')
@@ -103,7 +62,8 @@ class DeconvolutionResult:
             sql = f'''CREATE TABLE IF NOT EXISTS {self.table_key}(
                 ID CHAR PRIMARY KEY NOT NULL,
                 DATE FLOAT,
-                N_TOPICS INT
+                N_TOPICS INT,
+                PARAMS TEXT
                 )
                 '''
             cursor.execute(sql)
@@ -131,16 +91,16 @@ class DeconvolutionResult:
         return json.loads(reader.read(path))
 
 
-    def add_new_result(self, info: dict):
+    def add_new_result(self, meta_info: DeconvolutionMetaInfo, result: DeconvolutionResult):
 
-        self.write(info['id'], info['result'])
+        self.write(meta_info.id, result)
 
         with sqlite3.connect(self.db_path) as con:
             cursor = con.cursor()
             cursor.execute(f'''INSERT INTO {self.table_key}
-                (ID, DATE, N_TOPICS)
-                VALUES (?, ?, ?)
-                ''', (info['id'], get_timestamp(), info['n_topics']))
+                (ID, DATE, N_TOPICS, PARAMS)
+                VALUES (?, ?, ?, ?)
+                ''', (meta_info.id, get_timestamp(), meta_info.n_topics, meta_info.params))
             con.commit()
 
         self.read()
@@ -155,6 +115,6 @@ class DeconvolutionResult:
     def __get_result_path(self, id) -> str:
         return os.path.join(self.__dir, id)
 
-    def write(self, result_id: str, info: DeconvolutionInfo):
+    def write(self, result_id: str, info: DeconvolutionResult):
         reader = TextReader()
         reader.write(info.json(), self.__get_result_path(result_id))
