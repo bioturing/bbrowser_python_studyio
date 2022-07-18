@@ -39,7 +39,7 @@ class DeconvolutionMetaInfo(BaseModel):
     n_topics: int
     params: str
 
-class DeconvolutionResultHandler:
+class DeconvolutionResultDB:
     def __init__(self, deconvolution_folder: str) -> None:
         self.__dir = deconvolution_folder
         self.db_path = os.path.join(self.__dir, 'deconvolution_result.db')
