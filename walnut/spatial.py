@@ -98,7 +98,7 @@ class Spatial:
         self.__dir = spatial_folder
         self.__spatial_info = FileIO(os.path.join(self.__dir, "info.json"), reader, IOSpatial)
 
-        self.spatial_info = spatial_info or SpatialInfo()
+        self.spatial_info = spatial_info if spatial_info else self.read()
 
     def exists(self):
         return self.__spatial_info.exists()
@@ -109,10 +109,9 @@ class Spatial:
     def read(self):
         if not self.exists():
             print("WARNING: No spatial info to read")
-            return False
+            return SpatialInfo()
 
-        self.spatial_info = self.__spatial_info.read()
-        return True
+        return self.__spatial_info.read()
 
     def write(self):
         self.__spatial_info.write(self.spatial_info)
@@ -122,8 +121,8 @@ class Spatial:
     def update(self,
         width: float,
         height: float,
-        diameter: List[float],
-        diameter_micron: List[float],
+        diameter: Union[List[float], float],
+        diameter_micron: Union[List[float], float],
         version: int = 1
     ):
         try:

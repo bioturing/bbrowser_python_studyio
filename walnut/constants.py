@@ -10,7 +10,7 @@ LENSID = Union[int, str]
 
 SPECIES_LIST = Literal["human", "mouse", "rat", "zebrafish", "fly",
                         "m_fascicularis", "other"]
-OMICS_LIST = Literal["RNA", "ADT", "PRTB", "spatial"]
+OMICS_LIST = Literal["RNA", "ADT", "PRTB", "spatial", "NA"]
 UNIT_TYPE_LIST = Literal["norm", "raw"]
 UNIT_TRANSFORM_LIST = Literal["none", "log2"]
 UNIT_LIST = Literal["umi", "lognorm", "read", "cpm", "tpm", "rpkm", "fpkm",
