@@ -99,6 +99,7 @@ class DeconvolutionResultDB:
             con.commit()
         path = self.__get_result_path(id)
         os.remove(path)
+        return "SUCCESS"
 
     def add_new_result(self, meta_info: DeconvolutionMetaInfo, result: DeconvolutionResult):
 
